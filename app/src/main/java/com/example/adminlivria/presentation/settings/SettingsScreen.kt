@@ -1,5 +1,6 @@
 package com.example.adminlivria.presentation.settings
 
+import android.widget.Button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.adminlivria.presentation.ui.theme.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 
 @Composable
@@ -29,44 +28,45 @@ fun SettingsScreen(
 ) {
     val state = viewModel.uiState
 
-    if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else {
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 35.dp)
-                .verticalScroll(rememberScrollState()),
-            shape = RoundedCornerShape(
-                topStart = 6.dp,
-                topEnd = 6.dp,
-                bottomStart = 18.dp,
-                bottomEnd = 18.dp
-            ),
-            colors = CardDefaults.cardColors(containerColor = LivriaWhite),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    Scaffold { paddingValues ->
+        Column(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(paddingValues)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                SettingsHeader()
-                Spacer(modifier = Modifier.height(16.dp))
-                WelcomeCard(state.user.username, state.user.fullName)
-                Spacer(modifier = Modifier.height(20.dp))
-                TabSelector(
-                    isProfileSelected = state.isProfileTabSelected,
-                    onSelectProfile = { viewModel.setTab(true) },
-                    onSelectApplication = { viewModel.setTab(false) }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                if (state.isProfileTabSelected) {
-                    ProfileSettingsContent(state, viewModel)
-                } else {
-                    ApplicationSettingsContent(viewModel)
+            if (state.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp, 0.dp),
+                    colors = CardDefaults.cardColors(containerColor = LivriaWhite),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 10.dp
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp)
+                    ) {
+                        SettingsHeader()
+                        Spacer(modifier = Modifier.height(18.dp))
+                        WelcomeCard(state.user.username, state.user.fullName)
+                        Spacer(modifier = Modifier.height(18.dp))
+                        TabSelector(
+                            isProfileSelected = state.isProfileTabSelected,
+                            onSelectProfile = { viewModel.setTab(true) },
+                            onSelectApplication = { viewModel.setTab(false) }
+                        )
+                        Spacer(modifier = Modifier.height(18.dp))
+                        if (state.isProfileTabSelected) {
+                            ProfileSettingsContent(state, viewModel)
+                        } else {
+                            ApplicationSettingsContent(viewModel)
+                        }
+                    }
                 }
             }
         }
@@ -79,7 +79,7 @@ fun SettingsScreen(
 fun SettingsHeader() {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
         Text(
-            text = "Settings",
+            "Settings",
             textAlign = TextAlign.Center,
             color = LivriaOrange,
             style = MaterialTheme.typography.bodyLarge.copy(
@@ -90,14 +90,14 @@ fun SettingsHeader() {
                 .padding(6.dp)
         )
         Text(
-            text = "Manage your account and system preferences",
+            "Manage your account and system preferences",
             textAlign = TextAlign.Center,
             color = LivriaBlack,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp
             ),
-            modifier = Modifier.fillMaxWidth().padding(18.dp, 10.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 3.dp)
         )
 
         HorizontalDivider(
@@ -159,7 +159,7 @@ fun TabSelector(
     onSelectApplication: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -173,7 +173,7 @@ fun TabSelector(
             selected = isProfileSelected,
             onClick = onSelectProfile,
             colors = customChipColors,
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(10.dp),
             border = FilterChipDefaults.filterChipBorder(
                 enabled = true,
                 selected = isProfileSelected,
@@ -181,14 +181,20 @@ fun TabSelector(
                 selectedBorderColor = Color.Transparent,
                 borderWidth = 0.dp
             ),
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp).height(48.dp),
-            label = { Text("Profile", fontFamily = AlexandriaFontFamily, fontSize = 18.sp, color = LivriaBlue) }
-        )
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp).height(40.dp),
+            label = {
+                Text(
+                    "PROFILE",
+                    fontFamily = AlexandriaFontFamily,
+                    fontSize = 14.sp,
+                    color = LivriaBlue,
+                    fontWeight = FontWeight.SemiBold
+                ) }        )
         FilterChip(
             selected = !isProfileSelected,
             onClick = onSelectApplication,
             colors = customChipColors,
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(10.dp),
             border = FilterChipDefaults.filterChipBorder(
                 enabled = true,
                 selected = !isProfileSelected,
@@ -196,8 +202,15 @@ fun TabSelector(
                 selectedBorderColor = Color.Transparent,
                 borderWidth = 0.dp
             ),
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp).height(48.dp),
-            label = { Text("Application", fontFamily = AlexandriaFontFamily, fontSize = 18.sp, color = LivriaBlue) }
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp).height(40.dp),
+            label = {
+                Text(
+                    "APPLICATION",
+                    fontFamily = AlexandriaFontFamily,
+                    fontSize = 14.sp,
+                    color = LivriaBlue,
+                    fontWeight = FontWeight.SemiBold
+                ) }
         )
     }
 }
@@ -206,14 +219,6 @@ fun TabSelector(
 
 @Composable
 fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel) {
-    val labelTextStyle = MaterialTheme.typography.labelLarge.copy(
-        color = LivriaNavyBlue,
-        fontFamily = AlexandriaFontFamily
-    )
-    val inputTextStyle = LocalTextStyle.current.copy(
-        color = LivriaNavyBlue,
-        fontFamily = AlexandriaFontFamily
-    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -222,7 +227,8 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
                 fontFamily = AsapCondensedFontFamily,
                 color = LivriaAmber,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 22.sp
+                fontSize = 20.sp,
+                letterSpacing = 2.sp
             ),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
@@ -231,66 +237,85 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
         OutlinedTextField(
             value = state.user.fullName,
             onValueChange = { viewModel.updateField("fullName", it) },
-            label = { Text("Name", style = labelTextStyle) },
-            textStyle = inputTextStyle,
+            label = {
+                Text(
+                    "Name",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp
+                    )
+                )
+            },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 14.sp
+            ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
                 unfocusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
             ),
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = state.user.username,
-            onValueChange = { viewModel.updateField("username", it) },
-            label = { Text("Username", style = labelTextStyle) },
-            textStyle = inputTextStyle,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-                unfocusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         )
 
         OutlinedTextField(
             value = state.user.email,
             onValueChange = { viewModel.updateField("email", it) },
-            label = { Text("Email", style = labelTextStyle) },
-            textStyle = inputTextStyle,
+            label = {
+                Text(
+                    "Email",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+                )
+            },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 12.sp
+            ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
                 unfocusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
             ),
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         )
 
         OutlinedTextField(
             value = state.securityPin,
             onValueChange = { viewModel.updateField("securityPin", it) },
-            label = { Text("Security Pin", style = labelTextStyle) },
-            textStyle = inputTextStyle,
-            visualTransformation = PasswordVisualTransformation(),
+            label = {
+                Text(
+                    "Security Pin",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp
+                    )
+                )
+            },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 14.sp
+            ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
                 unfocusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
             ),
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         )
 
         if (state.saveSuccess) {
@@ -308,7 +333,7 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            OutlinedButton(
+            Button(
                 onClick = viewModel::logout,
                 enabled = !state.isSaving,
                 shape = RoundedCornerShape(12.dp),
@@ -318,7 +343,7 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
                 ),
                 modifier = Modifier.weight(0.4f).height(50.dp).padding(end = 8.dp)
             ) {
-                Text("Log Out", fontFamily = AlexandriaFontFamily)
+                Text("LOG OUT", fontFamily = AlexandriaFontFamily, )
             }
 
             Button(
@@ -334,7 +359,7 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
                 if (state.isSaving) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = LivriaBlue)
                 } else {
-                    Text("Save Changes", fontFamily = AlexandriaFontFamily)
+                    Text("SAVE CHANGES", fontFamily = AlexandriaFontFamily)
                 }
             }
         }
@@ -391,11 +416,12 @@ fun ApplicationSettingsContent(viewModel: SettingsViewModel) {
                 "Changes saved successfully!",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 8.dp),
-                fontFamily = AlexandriaFontFamily
+                fontFamily = AlexandriaFontFamily,
+                fontSize = 12.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp)) // Espacio extra para separarlo de los toggles
+        Spacer(modifier = Modifier.height(18.dp)) // Espacio extra para separarlo de los toggles
 
         Row(
             modifier = Modifier.fillMaxWidth(),
