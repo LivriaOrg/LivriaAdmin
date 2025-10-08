@@ -270,12 +270,12 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
                     "Email",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp
+                        fontSize = 12.sp
                     )
                 )
             },
             textStyle = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 12.sp
+                fontSize = 14.sp
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
