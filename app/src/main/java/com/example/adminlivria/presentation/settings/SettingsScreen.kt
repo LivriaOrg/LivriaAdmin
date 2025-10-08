@@ -42,10 +42,10 @@ fun SettingsScreen(
             shape = RoundedCornerShape(
                 topStart = 6.dp,
                 topEnd = 6.dp,
-                bottomStart = 24.dp,
-                bottomEnd = 24.dp
+                bottomStart = 18.dp,
+                bottomEnd = 18.dp
             ),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = LivriaWhite),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
@@ -80,22 +80,31 @@ fun SettingsHeader() {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
         Text(
             text = "Settings",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontFamily = AlexandriaFontFamily
-            ),
-            modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            color = LivriaOrange
+            color = LivriaOrange,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 20.sp
+            ),
+            modifier = Modifier.fillMaxWidth()
+                .padding(6.dp)
         )
         Text(
             text = "Manage your account and system preferences",
+            textAlign = TextAlign.Center,
+            color = LivriaBlack,
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = AlexandriaFontFamily,
-                fontSize = 12.sp
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
+            modifier = Modifier.fillMaxWidth().padding(18.dp, 10.dp)
+        )
+
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 18.dp),
+            thickness = 2.dp,
+            color = LivriaSoftCyan
         )
     }
 }
@@ -107,12 +116,12 @@ fun WelcomeCard(username: String, role: String) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(LivriaYellowLight.copy(alpha = 0.35f))
-            .padding(16.dp),
+            .padding(18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(LivriaOrange),
             contentAlignment = Alignment.Center
@@ -128,17 +137,15 @@ fun WelcomeCard(username: String, role: String) {
         Column {
             Text(
                 text = "Hello, $username!",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = AlexandriaFontFamily,
+                style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = LivriaBlue
                 )
             )
             Text(
                 text = role,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = AlexandriaFontFamily,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    color = LivriaBlue
                 )
             )
         }
@@ -333,14 +340,6 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
         }
     }
 }
-
-@Composable
-fun ApplicationSettingsContent() {
-    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-        Text("Application settings content coming soon...")
-    }
-}
-
 
 // ---------- Application Content ----------
 

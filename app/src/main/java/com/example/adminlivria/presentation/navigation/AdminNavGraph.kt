@@ -27,8 +27,6 @@ import com.example.adminlivria.presentation.settings.SettingsScreen
 fun AdminNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
-
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -50,7 +48,7 @@ fun AdminNavGraph(
                 HomeScreen(navController = navController)
             }
 
-            // 2. SETTINGS (Ruta de la barra superior - ÚNICA ENTRADA)
+            // 2. SETTINGS (RUTA BARRA SUPERIOR)
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 val context = LocalContext.current
 
@@ -84,12 +82,11 @@ fun AdminNavGraph(
                     Toast.makeText(context, "STATS!", Toast.LENGTH_SHORT).show()
                 }            }
 
-            // 4. RUTAS DETALLE (Aunque no se usan en la Bottom Bar, deben estar si existen)
+            // 4. RUTAS DETALLE
             composable(route = NavDestinations.BOOK_DETAIL_ROUTE) {  }
             composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {  }
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
-            composable(route = NavDestinations.SETTINGS_APP_ROUTE) {  }
         }
     }
 }

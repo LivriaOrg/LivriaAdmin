@@ -83,6 +83,4 @@ val Typography = Typography(
         fontSize = 11.sp,
         letterSpacing = 0.5.sp
     )
-
-    /* Agrega o modifica otros estilos de tipografía aquí (titleSmall, labelMedium, etc.) */
 )
