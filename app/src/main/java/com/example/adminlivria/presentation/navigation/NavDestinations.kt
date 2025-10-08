@@ -2,7 +2,10 @@ package com.example.adminlivria.presentation.navigation
 
 object NavDestinations {
 
+    const val LOGIN_ROUTE = "login"
+
     // Ruta principal
+
     const val HOME_ROUTE = "home"
 
     const val BOOKS_MANAGEMENT_ROUTE = "books_management"

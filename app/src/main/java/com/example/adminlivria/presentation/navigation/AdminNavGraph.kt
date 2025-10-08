@@ -22,6 +22,7 @@ import com.example.adminlivria.presentation.components.LivriaBottomNavBar
 import com.example.adminlivria.presentation.components.LivriaTopBar
 import com.example.adminlivria.presentation.home.HomeScreen
 import com.example.adminlivria.presentation.settings.SettingsScreen
+import com.example.adminlivria.presentation.login.LoginScreen
 
 @Composable
 fun AdminNavGraph(
@@ -32,20 +33,40 @@ fun AdminNavGraph(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
+
     val adminUser = AdminUser.mock()
 
     Scaffold(
-        topBar = { LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser) },
-        bottomBar = { LivriaBottomNavBar(navController = navController) }
+        topBar = {
+            if (showBars) {
+                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
+            }
+        },
+        bottomBar = {
+            if (showBars) {
+                LivriaBottomNavBar(navController = navController)
+            }
+        }
     ) { paddingValues ->
 
-        // El NavHost es el que cambia el contenido interno (las pantallas)
         NavHost(
             navController = navController,
-            startDestination = NavDestinations.HOME_ROUTE,
+            startDestination = NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
-            // 1. HOME
+
+            composable(route = NavDestinations.LOGIN_ROUTE) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(NavDestinations.HOME_ROUTE) {
+                            popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // 1. HOME (Rutas que requieren autenticación)
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(navController = navController)
             }
