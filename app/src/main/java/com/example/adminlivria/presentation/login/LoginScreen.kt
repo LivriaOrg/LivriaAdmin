@@ -105,7 +105,7 @@ fun LoginScreen(
                         focusedIndicatorColor = LivriaBlue,
                         unfocusedIndicatorColor = LivriaLightGray,
                         focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaSoftCyan,
+                        unfocusedLabelColor = LivriaBlue,
                         cursorColor = LivriaBlue
                     ),
                     modifier = Modifier
@@ -138,7 +138,7 @@ fun LoginScreen(
                         focusedIndicatorColor = LivriaBlue,
                         unfocusedIndicatorColor = LivriaLightGray,
                         focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaSoftCyan,
+                        unfocusedLabelColor = LivriaBlue,
                         cursorColor = LivriaBlue
                     ),
                     modifier = Modifier
@@ -171,7 +171,7 @@ fun LoginScreen(
                         focusedIndicatorColor = LivriaBlue,
                         unfocusedIndicatorColor = LivriaLightGray,
                         focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaSoftCyan,
+                        unfocusedLabelColor = LivriaBlue,
                         cursorColor = LivriaBlue
                     ),
                     modifier = Modifier

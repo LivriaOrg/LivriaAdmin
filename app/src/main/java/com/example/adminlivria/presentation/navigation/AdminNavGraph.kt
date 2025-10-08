@@ -23,6 +23,7 @@ import com.example.adminlivria.presentation.components.LivriaTopBar
 import com.example.adminlivria.presentation.home.HomeScreen
 import com.example.adminlivria.presentation.settings.SettingsScreen
 import com.example.adminlivria.presentation.login.LoginScreen
+import com.example.adminlivria.presentation.ordermanagement.OrdersScreen
 
 @Composable
 fun AdminNavGraph(
@@ -50,7 +51,7 @@ fun AdminNavGraph(
 
         NavHost(
             navController = navController,
-            startDestination = NavDestinations.LOGIN_ROUTE,
+            startDestination = NavDestinations.ORDERS_MANAGEMENT_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
@@ -83,23 +84,22 @@ fun AdminNavGraph(
                 }
             }
             composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
-                val context = LocalContext.current
-
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "ORDERS!", Toast.LENGTH_SHORT).show()
-                }            }
+                OrdersScreen(navController = navController)
+            }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
                 val context = LocalContext.current
 
                 LaunchedEffect(Unit) {
                     Toast.makeText(context, "INVENTORY!", Toast.LENGTH_SHORT).show()
-                }            }
+                }
+            }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
                 val context = LocalContext.current
 
                 LaunchedEffect(Unit) {
                     Toast.makeText(context, "STATS!", Toast.LENGTH_SHORT).show()
-                }            }
+                }
+            }
 
             // 4. RUTAS DETALLE
             composable(route = NavDestinations.BOOK_DETAIL_ROUTE) {  }
