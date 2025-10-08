@@ -56,9 +56,6 @@ fun HomeScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize())
     { paddingValues ->
-
-        val context = LocalContext.current
-
         Column(
             modifier = Modifier.fillMaxWidth()
                 .fillMaxHeight()

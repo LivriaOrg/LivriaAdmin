@@ -1,5 +1,6 @@
-package com.example.adminlivria.data.remote
+package com.example.adminlivria.common
 
+import com.example.adminlivria.data.remote.AuthService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
