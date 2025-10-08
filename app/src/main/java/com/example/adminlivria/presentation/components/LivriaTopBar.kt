@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 import com.example.adminlivria.R
+import com.example.adminlivria.domain.profilecontext.entity.AdminUser
 import com.example.adminlivria.presentation.navigation.NavDestinations
 import com.example.adminlivria.presentation.ui.theme.AsapCondensedFontFamily
 import com.example.adminlivria.presentation.ui.theme.LivriaAmber
@@ -43,11 +44,12 @@ import com.example.adminlivria.presentation.ui.theme.LivriaYellowLight
 @Composable
 fun LivriaTopBar(
     navController: NavController,
-    //POR MIENTRAS PQ NO ESTÁ CONECTADOOOOOOOOO
-    currentCapital: String = "4266.37",
-    currentRoute: String?
+    currentRoute: String?,
+    currentUser: AdminUser? = null
 ) {
     val isSettingsSelected = currentRoute == NavDestinations.SETTINGS_PROFILE_ROUTE
+    val capitalValue = currentUser?.capital ?: 0.0
+    val currentCapital = String.format("%.2f", capitalValue)
 
     Column(
             modifier = Modifier.fillMaxWidth()
