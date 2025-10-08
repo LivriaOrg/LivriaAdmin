@@ -35,7 +35,7 @@ sealed class BottomNavItem(
     object Home : BottomNavItem("Home", R.drawable.ic_home, NavDestinations.HOME_ROUTE)
     object Books : BottomNavItem("Books", R.drawable.ic_book, NavDestinations.BOOKS_MANAGEMENT_ROUTE)
     object Orders : BottomNavItem("Orders", R.drawable.ic_cart, NavDestinations.ORDERS_MANAGEMENT_ROUTE)
-    object Inventory : BottomNavItem("Inventory", R.drawable.ic_clipboard, NavDestinations.INVENTORY_VIEW_COLLECTION_ROUTE)
+    object Inventory : BottomNavItem("Inventory", R.drawable.ic_clipboard, NavDestinations.INVENTORY_ADD_BOOK_ROUTE)
     object Stats : BottomNavItem("Stats", R.drawable.ic_stats, NavDestinations.STATISTICS_ROUTE)
 }
 
