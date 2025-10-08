@@ -50,8 +50,6 @@ fun AdminNavGraph(
 
             // 2. SETTINGS (RUTA BARRA SUPERIOR)
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
-                val context = LocalContext.current
-
                 SettingsScreen()
             }
 
@@ -69,7 +67,7 @@ fun AdminNavGraph(
                 LaunchedEffect(Unit) {
                     Toast.makeText(context, "ORDERS!", Toast.LENGTH_SHORT).show()
                 }            }
-            composable(route = NavDestinations.INVENTORY_VIEW_COLLECTION_ROUTE) {
+            composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
                 val context = LocalContext.current
 
                 LaunchedEffect(Unit) {
@@ -85,7 +83,6 @@ fun AdminNavGraph(
             // 4. RUTAS DETALLE
             composable(route = NavDestinations.BOOK_DETAIL_ROUTE) {  }
             composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
-            composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {  }
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
         }
     }
