@@ -17,20 +17,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.adminlivria.domain.profilecontext.entity.AdminUser
 import com.example.adminlivria.presentation.components.LivriaBottomNavBar
 import com.example.adminlivria.presentation.components.LivriaTopBar
 import com.example.adminlivria.presentation.home.HomeScreen
+import com.example.adminlivria.presentation.settings.SettingsScreen
 
 @Composable
 fun AdminNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
 
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val adminUser = AdminUser.mock()
+
     Scaffold(
-        topBar = { LivriaTopBar(navController = navController, currentRoute = currentRoute) },
+        topBar = { LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser) },
         bottomBar = { LivriaBottomNavBar(navController = navController) }
     ) { paddingValues ->
 
@@ -49,9 +54,7 @@ fun AdminNavGraph(
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 val context = LocalContext.current
 
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "SETTINGS!", Toast.LENGTH_SHORT).show()
-                }
+                SettingsScreen()
             }
 
             // 3. RUTAS DE LA BARRA INFERIOR
