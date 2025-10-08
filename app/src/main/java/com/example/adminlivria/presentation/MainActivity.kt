@@ -11,12 +11,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
+import com.example.adminlivria.presentation.components.LivriaTopBar
+import com.example.adminlivria.presentation.navigation.AdminNavGraph
 import com.example.adminlivria.presentation.ui.theme.AdminLivriaTheme
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         enableEdgeToEdge()
         setContent {
             _root_ide_package_.com.example.adminlivria.presentation.ui.theme.AdminLivriaTheme {
@@ -25,6 +30,7 @@ class MainActivity : ComponentActivity() {
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
+                    AdminNavGraph()
                 }
             }
         }

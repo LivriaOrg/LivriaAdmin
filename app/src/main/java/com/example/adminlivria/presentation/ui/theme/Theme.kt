@@ -25,9 +25,9 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = Color.White,
 
     // Fondos y Superficies
-    background = LivriaLightGray,  // Gris Claro para el fondo de la pantalla
+    background = LivriaWhite,  // Gris Claro para el fondo de la pantalla
     onBackground = Color.Black,    // Texto sobre fondo
-    surface = Color.White,         // Fondo de componentes (Tarjetas)
+    surface = LivriaLightGray,         // Fondo de componentes (Tarjetas)
     onSurface = Color.Black,       // Texto sobre superficie
 
     // Color de error
