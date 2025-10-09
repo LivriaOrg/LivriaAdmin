@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 import com.example.adminlivria.R
-import com.example.adminlivria.profilecontext.domain.AdminUser
 import com.example.adminlivria.common.navigation.NavDestinations
 import com.example.adminlivria.common.ui.theme.AsapCondensedFontFamily
 import com.example.adminlivria.common.ui.theme.LivriaAmber
@@ -44,11 +43,10 @@ import com.example.adminlivria.common.ui.theme.LivriaYellowLight
 fun LivriaTopBar(
     navController: NavController,
     currentRoute: String?,
-    currentUser: AdminUser? = null
+    currentCapitalValue: Double
 ) {
     val isSettingsSelected = currentRoute == NavDestinations.SETTINGS_PROFILE_ROUTE
-    val capitalValue = currentUser?.capital ?: 0.0
-    val currentCapital = String.format("%.2f", capitalValue)
+    val currentCapital = String.format("%.2f", currentCapitalValue)
 
     Column(
             modifier = Modifier.fillMaxWidth()

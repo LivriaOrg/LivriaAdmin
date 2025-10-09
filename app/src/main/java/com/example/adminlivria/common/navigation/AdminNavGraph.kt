@@ -32,6 +32,7 @@ import com.example.adminlivria.common.initializeTokenManager // Necesario para T
 import com.example.adminlivria.profilecontext.presentation.LoginViewModel // Asumo el paquete
 import com.example.adminlivria.profilecontext.presentation.LoginViewModelFactory // Asumo el paquete
 import com.example.adminlivria.profilecontext.presentation.SettingsViewModel // Asumo el paquete
+import com.example.adminlivria.searchcontext.presentation.HomeViewModelFactory
 import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory// Asumo el paquete
 import androidx.compose.runtime.remember // Necesario para memoizar el ViewModel
 import androidx.compose.runtime.collectAsState // Necesario para el capital si el ViewModel lo usa
@@ -62,11 +63,19 @@ fun AdminNavGraph(
         tokenManager = tokenManager
     )
 
+    val homeViewModelFactory = remember {
+        HomeViewModelFactory(
+            userAdminService = userAdminServiceInstance,
+            tokenManager = tokenManager
+        )
+    }
+
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val settingsViewModel: SettingsViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
         factory = settingsViewModelFactory
     )
+
     val settingsState by settingsViewModel.uiState.collectAsState()
 
 
@@ -75,7 +84,7 @@ fun AdminNavGraph(
 
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    val adminUser = AdminUser.mock().copy(capital = settingsState.capital)
+    val currentCapitalForTopBar = settingsState.capital
 
 
     val booksViewModel: BooksManagementViewModel = viewModel(
@@ -86,7 +95,7 @@ fun AdminNavGraph(
     Scaffold(
         topBar = {
             if (showBars) {
-                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
+                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentCapitalValue = currentCapitalForTopBar )
             }
         },
         bottomBar = {
@@ -128,9 +137,14 @@ fun AdminNavGraph(
                     }
                 )
             }
+
             // 1. HOME (Rutas que requieren autenticación)
             composable(route = NavDestinations.HOME_ROUTE) {
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    navController = navController,
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
             }
 
             // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
@@ -176,6 +190,4 @@ fun AdminNavGraph(
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
         }
     }
-    // ELIMINACIÓN DE CODIGO DUPLICADO (ESTO CAUSABA PROBLEMAS)
-    // composable(route = NavDestinations.LOGIN_ROUTE) { ... }
 }

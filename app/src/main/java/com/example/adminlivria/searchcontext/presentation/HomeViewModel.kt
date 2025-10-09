@@ -1,20 +1,91 @@
 package com.example.adminlivria.searchcontext.presentation
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import com.example.adminlivria.profilecontext.domain.AdminUser
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.adminlivria.profilecontext.data.local.TokenManager
+import com.example.adminlivria.profilecontext.data.remote.UserAdminService
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 data class HomeUiState(
     val user: AdminUser = AdminUser.mock(),
-
+    val isLoading: Boolean = true,
+    val loadError: String? = null,
 )
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val userAdminService: UserAdminService,
+    private val tokenManager: TokenManager
+) : ViewModel() {
 
-    var uiState by mutableStateOf(HomeUiState())
-        private set
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val adminId: Int = tokenManager.getAdminId()
 
+    init {
+        viewModelScope.launch {
+            loadAdminData()
+        }
+    }
+
+    private suspend fun loadAdminData() {
+        if (adminId == 0) {
+            _uiState.update { it.copy(loadError = "Error: Sesión no válida.", isLoading = false) }
+            return
+        }
+
+        _uiState.update { it.copy(isLoading = true, loadError = null) }
+
+        try {
+            val response = userAdminService.getUserAdminData()
+
+            if (response.isSuccessful) {
+                val adminList = response.body()
+                val adminDto = adminList?.firstOrNull()
+
+                adminDto?.let {
+                    val adminUser = AdminUser(
+                        id = it.id.toString(),
+                        username = it.username,
+                        fullName = it.display,
+                        email = it.email,
+                        capital = it.capital,
+                        adminAccess = if (it.adminAccess) 1 else 0
+                    )
+
+                    _uiState.update { state ->
+                        state.copy(
+                            user = adminUser, // Actualiza el objeto AdminUser completo
+                            isLoading = false
+                        )
+                    }
+                } ?: run {
+                    _uiState.update { it.copy(
+                        loadError = "No se encontraron datos del administrador.",
+                        isLoading = false
+                    ) }
+                }
+            } else {
+                _uiState.update { it.copy(
+                    loadError = "No se pudieron cargar los datos. (Error ${response.code()})",
+                    isLoading = false
+                ) }
+            }
+        } catch (e: Exception) {
+            val errorMsg = when (e) {
+                is HttpException -> "Error de servidor: ${e.message()}"
+                is IOException -> "Error de conexión. Verifique su red."
+                else -> "Ocurrió un error inesperado al cargar los datos."
+            }
+            _uiState.update { it.copy(loadError = errorMsg, isLoading = false) }
+        }
+    }
 }
