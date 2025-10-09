@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.adminlivria.common.inventoryServiceInstance
@@ -49,7 +50,7 @@ import com.example.adminlivria.common.ui.theme.LivriaYellowLight
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBookScreen() {
+fun AddBookScreen(navController: NavController) {
     val context = LocalContext.current
 
     val viewModel: AddBookViewModel = viewModel(
@@ -69,8 +70,13 @@ fun AddBookScreen() {
         uiState.successMessage?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
             viewModel.clearMessages()
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set("refresh_books", true)
+            navController.popBackStack()
         }
     }
+
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
@@ -79,7 +85,8 @@ fun AddBookScreen() {
     }
 
 
-        Column(
+
+    Column(
             modifier = Modifier
                 .fillMaxSize()
                 // 2. CAMBIAMOS EL BACKGROUND PRINCIPAL A BLANCO

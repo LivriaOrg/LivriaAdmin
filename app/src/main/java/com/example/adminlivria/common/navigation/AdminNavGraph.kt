@@ -1,5 +1,6 @@
 package com.example.adminlivria.common.navigation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -55,6 +56,8 @@ fun AdminNavGraph(
     val context = LocalContext.current
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
+    Log.d("AdminNavGraph", "token=${tokenManager.getToken()} adminId=${tokenManager.getAdminId()}")
+
 
 
     val loginViewModelFactory = LoginViewModelFactory(
@@ -66,12 +69,19 @@ fun AdminNavGraph(
         tokenManager = tokenManager
     )
 
+    val homeViewModelFactory = remember {
+        HomeViewModelFactory(
+            userAdminService = userAdminServiceInstance,
+            tokenManager = tokenManager
+        )
+    }
+
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val settingsViewModel: SettingsViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
         factory = settingsViewModelFactory
     )
-    val settingsState by settingsViewModel.uiState.collectAsState()
+
 
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -80,6 +90,7 @@ fun AdminNavGraph(
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
     val adminUser = AdminUser.mock().copy(capital = settingsState.capital)
+
 
     val booksViewModel: BooksManagementViewModel = viewModel(
         factory = BooksViewModelFactory(context)
@@ -93,7 +104,12 @@ fun AdminNavGraph(
     Scaffold(
         topBar = {
             if (showBars) {
-                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
+                LivriaTopBar(
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
             }
         },
         bottomBar = {
@@ -106,45 +122,45 @@ fun AdminNavGraph(
         NavHost(
             navController = navController,
             startDestination = if (tokenManager.getToken() != null)
-                NavDestinations.HOME_ROUTE else NavDestinations.LOGIN_ROUTE,
+                NavDestinations.HOME_ROUTE
+            else
+                NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
+            // --- LOGIN ---
             composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
-                val scope = rememberCoroutineScope()
-
                 LoginScreen(
                     viewModel = loginViewModel,
                     onLoginSuccess = {
-
-                        scope.launch {
-
-                            val settingsJob = launch { settingsViewModel.loadAdminData() }
-                            val booksJob = launch { booksViewModel.refresh() }
-
-
-                            settingsJob.join()
-                            booksJob.join()
-
-
-                            navController.navigate(NavDestinations.HOME_ROUTE) {
-                                popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
-                            }
+                        navController.navigate(NavDestinations.HOME_ROUTE) {
+                            popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
                         }
                     }
                 )
             }
 
+            // --- HOME ---
             composable(route = NavDestinations.HOME_ROUTE) {
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    navController = navController,
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
             }
 
-
+            // --- SETTINGS ---
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
+                val settingsViewModelFactory = SettingsViewModelFactory(
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
+                val settingsViewModel: SettingsViewModel = viewModel(factory = settingsViewModelFactory)
+
                 SettingsScreen(
-                    viewModel = settingsViewModel,
-                    onLogout = {
+                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
+                    onLogout = { // <-- Se pasa el callback onLogout
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -153,6 +169,7 @@ fun AdminNavGraph(
                 )
             }
 
+            //  RUTAS DE LA BARRA INFERIOR
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
                     navController = navController,
@@ -166,7 +183,7 @@ fun AdminNavGraph(
                 )
             }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                AddBookScreen()
+                AddBookScreen(navController = navController)
             }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
                 val context = LocalContext.current

@@ -1,13 +1,12 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.adminlivria.bookcontext.presentation
 
 import androidx.navigation.NavController
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.CardDefaults.cardElevation
@@ -15,36 +14,55 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.example.adminlivria.R
-import com.example.adminlivria.bookcontext.domain.Book
 import com.example.adminlivria.bookcontext.domain.BookFilters
-import com.example.adminlivria.bookcontext.domain.SortOption
 import com.example.adminlivria.bookcontext.presentation.components.BookGridTile
 import com.example.adminlivria.common.navigation.NavDestinations
 import com.example.adminlivria.common.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BooksScreen(
     navController: NavController,
     viewModel: BooksManagementViewModel = viewModel(factory = BooksViewModelFactory(LocalContext.current))
 ) {
+    // ✅ Detectar cambios y refrescar automáticamente
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val refreshFlow = remember(savedStateHandle) {
+        savedStateHandle?.getStateFlow("refresh_books", false)
+    }
+    val shouldRefresh by (refreshFlow?.collectAsState(initial = false) ?: remember { mutableStateOf(false) })
+
+    LaunchedEffect(shouldRefresh) {
+        if (shouldRefresh) {
+            viewModel.refresh()
+            savedStateHandle?.set("refresh_books", false)
+        }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refresh()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // -------- UI principal --------
     val search by viewModel.search.collectAsState()
     val stats by viewModel.stats.collectAsState()
     val books by viewModel.books.collectAsState()
-
     val genres by viewModel.genres.collectAsState()
     val languages by viewModel.languages.collectAsState()
     val currentFilters by viewModel.filters.collectAsState()
@@ -52,9 +70,7 @@ fun BooksScreen(
     var showFilters by remember { mutableStateOf(false) }
 
     Scaffold { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(paddingValues)
-        ) {
+        Column(Modifier.fillMaxWidth().padding(paddingValues)) {
 
             Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                 Text(
@@ -90,13 +106,11 @@ fun BooksScreen(
                 )
             }
 
-
             SearchNFilterCardBooks(
                 search = search,
                 onSearchChange = { viewModel.onSearch(it) },
                 onOpenFilters = { showFilters = true }
             )
-
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 168.dp),
@@ -115,7 +129,6 @@ fun BooksScreen(
             }
         }
     }
-
 
     if (showFilters) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -227,7 +240,7 @@ private fun SearchNFilterCardBooks(
                 )
 
                 IconButton(
-                    onClick = {  },
+                    onClick = { },
                     modifier = Modifier.padding(end = 16.dp).size(24.dp).background(Color.Transparent)
                 ) {
                     Icon(
