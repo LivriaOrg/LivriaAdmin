@@ -35,12 +35,14 @@ import com.example.adminlivria.profilecontext.presentation.SettingsViewModel // 
 import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory// Asumo el paquete
 import androidx.compose.runtime.remember // Necesario para memoizar el ViewModel
 import androidx.compose.runtime.collectAsState // Necesario para el capital si el ViewModel lo usa
+import androidx.compose.runtime.rememberCoroutineScope
 
 
 import com.example.adminlivria.bookcontext.presentation.BooksScreen
 import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
 import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
 import com.example.adminlivria.bookcontext.presentation.detail.BookDetailScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun AdminNavGraph(
@@ -103,18 +105,29 @@ fun AdminNavGraph(
 
             composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
+                val scope = rememberCoroutineScope()
+
                 LoginScreen(
-                    viewModel = loginViewModel, // <-- Se pasa el ViewModel
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
-                        // Forzar la carga de datos del admin al iniciar sesión para obtener el capital
-                        settingsViewModel.loadAdminData()
-                        navController.navigate(NavDestinations.HOME_ROUTE) {
-                            popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
+
+                        scope.launch {
+                            // 1. Ejecutamos AMBAS tareas de red en paralelo para más eficiencia
+                            val settingsJob = launch { settingsViewModel.loadAdminData() }
+                            val booksJob = launch { booksViewModel.refresh() }
+
+                            // 2. Esperamos a que AMBAS terminen
+                            settingsJob.join()
+                            booksJob.join()
+
+                            // 3. SOLO CUANDO HAN TERMINADO, navegamos
+                            navController.navigate(NavDestinations.HOME_ROUTE) {
+                                popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
+                            }
                         }
                     }
                 )
             }
-
             // 1. HOME (Rutas que requieren autenticación)
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(navController = navController)

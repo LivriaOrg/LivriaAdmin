@@ -38,25 +38,23 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onLogout: () -> Unit
 ) {
-    // CORRECCIÓN: Colectar el StateFlow para obtener el objeto SettingsUiState
     val state by viewModel.uiState.collectAsState()
 
-    // Configuración del Snackbar para mostrar mensajes de éxito/error
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Manejo de errores de carga inicial
     LaunchedEffect(state.initialLoadError) {
         if (state.initialLoadError != null) {
             snackbarHostState.showSnackbar("Error al cargar datos: ${state.initialLoadError}")
         }
     }
 
-    // Manejo de éxito al guardar
     LaunchedEffect(state.saveSuccess) {
         if (state.saveSuccess) {
             snackbarHostState.showSnackbar("¡Datos actualizados exitosamente!")
         }
     }
+
+
 
 
     Scaffold(

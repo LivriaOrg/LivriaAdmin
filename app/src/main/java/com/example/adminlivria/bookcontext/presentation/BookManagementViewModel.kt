@@ -33,7 +33,12 @@ class BooksManagementViewModel(
 
     init {
         viewModelScope.launch {
-            repository.refreshBooks()
+            refresh()
         }
+    }
+
+    suspend fun refresh() {
+            repository.refreshBooks()
+
     }
 }
