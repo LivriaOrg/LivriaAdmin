@@ -158,7 +158,7 @@ fun AdminNavGraph(
                 OrdersScreen(navController = navController)
             }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                AddBookScreen()
+                AddBookScreen(navController = navController)
             }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
                 val context = LocalContext.current
