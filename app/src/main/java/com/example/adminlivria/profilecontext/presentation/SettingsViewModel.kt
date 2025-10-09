@@ -47,9 +47,16 @@ class SettingsViewModel(
     private val adminId: Int = tokenManager.getAdminId()
 
     init {
-        loadAdminData()
+        viewModelScope.launch {
+            loadAdminData()
+        }
     }
+    fun spend(amount: Double) {
+        if (amount <= 0) return
+        val current = _uiState.value.capital
+        _uiState.value = _uiState.value.copy(capital = (current - amount).coerceAtLeast(0.0))
 
+    }
 
     fun updateField(field: String, value: String) {
         _uiState.update { currentState ->
@@ -85,7 +92,7 @@ class SettingsViewModel(
     }
 
 
-    fun loadAdminData() {
+    suspend fun loadAdminData() {
         if (adminId == 0) {
             _uiState.update { it.copy(initialLoadError = "Error: Sesión no válida. Por favor, vuelva a iniciar sesión.", isLoading = false) }
             return
@@ -93,7 +100,6 @@ class SettingsViewModel(
 
         _uiState.update { it.copy(isLoading = true, initialLoadError = null) }
 
-        viewModelScope.launch {
             try {
                 val response = userAdminService.getUserAdminData()
 
@@ -126,7 +132,7 @@ class SettingsViewModel(
                 }
                 _uiState.update { it.copy(initialLoadError = errorMsg, isLoading = false) }
             }
-        }
+
     }
 
 

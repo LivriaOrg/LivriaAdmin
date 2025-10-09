@@ -13,10 +13,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.adminlivria.R
-import com.example.adminlivria.profilecontext.data.remote.AuthService
-import com.example.adminlivria.common.authServiceInstance
 import com.example.adminlivria.common.ui.theme.AlexandriaFontFamily
 import com.example.adminlivria.common.ui.theme.AsapCondensedFontFamily
 import com.example.adminlivria.common.ui.theme.LivriaBlack
@@ -25,16 +22,16 @@ import com.example.adminlivria.common.ui.theme.LivriaLightGray
 import com.example.adminlivria.common.ui.theme.LivriaOrange
 import com.example.adminlivria.common.ui.theme.LivriaWhite
 import com.example.adminlivria.common.ui.theme.LivriaYellowLight
-
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
 ) {
-
-
     val uiState = viewModel.uiState
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(uiState.isAuthenticated) {
         if (uiState.isAuthenticated) {
@@ -80,99 +77,48 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = uiState.username,
                     onValueChange = viewModel::onUsernameChange,
-                    label = {
-                        Text(
-                            "Username",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp
-                            )
-                        )
-                    },
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = LivriaBlack
-                    ),
+                    label = { Text("Username", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal, fontSize = 14.sp)) },
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = LivriaBlack),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LivriaWhite,
-                        unfocusedContainerColor = LivriaWhite,
-                        disabledContainerColor = LivriaWhite,
-                        focusedTextColor = LivriaBlack,
-                        unfocusedTextColor = LivriaBlack,
-                        focusedIndicatorColor = LivriaBlue,
-                        unfocusedIndicatorColor = LivriaLightGray,
-                        focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaBlue,
-                        cursorColor = LivriaBlue
+                        focusedContainerColor = LivriaWhite, unfocusedContainerColor = LivriaWhite,
+                        disabledContainerColor = LivriaWhite, focusedTextColor = LivriaBlack,
+                        unfocusedTextColor = LivriaBlack, focusedIndicatorColor = LivriaBlue,
+                        unfocusedIndicatorColor = LivriaLightGray, focusedLabelColor = LivriaBlue,
+                        unfocusedLabelColor = LivriaBlue, cursorColor = LivriaBlue
                     ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp, vertical = 15.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 15.dp)
                 )
 
                 OutlinedTextField(
                     value = uiState.password,
                     onValueChange = viewModel::onPasswordChange,
-                    label = {
-                        Text(
-                            "Password",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp
-                            )
-                        )
-                    },
+                    label = { Text("Password", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal, fontSize = 14.sp)) },
                     visualTransformation = PasswordVisualTransformation(),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = LivriaBlack
-                    ),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = LivriaBlack),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LivriaWhite,
-                        unfocusedContainerColor = LivriaWhite,
-                        disabledContainerColor = LivriaWhite,
-                        focusedTextColor = LivriaBlack,
-                        unfocusedTextColor = LivriaBlack,
-                        focusedIndicatorColor = LivriaBlue,
-                        unfocusedIndicatorColor = LivriaLightGray,
-                        focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaBlue,
-                        cursorColor = LivriaBlue
+                        focusedContainerColor = LivriaWhite, unfocusedContainerColor = LivriaWhite,
+                        disabledContainerColor = LivriaWhite, focusedTextColor = LivriaBlack,
+                        unfocusedTextColor = LivriaBlack, focusedIndicatorColor = LivriaBlue,
+                        unfocusedIndicatorColor = LivriaLightGray, focusedLabelColor = LivriaBlue,
+                        unfocusedLabelColor = LivriaBlue, cursorColor = LivriaBlue
                     ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp, vertical = 15.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 15.dp)
                 )
 
                 OutlinedTextField(
                     value = uiState.securityPin,
                     onValueChange = viewModel::onSecurityPinChange,
-                    label = {
-                        Text(
-                            "Security Pin",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp
-                            )
-                        )
-                    },
+                    label = { Text("Security Pin", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal, fontSize = 14.sp)) },
                     visualTransformation = PasswordVisualTransformation(),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = LivriaBlack
-                    ),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = LivriaBlack),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LivriaWhite,
-                        unfocusedContainerColor = LivriaWhite,
-                        disabledContainerColor = LivriaWhite,
-                        focusedTextColor = LivriaBlack,
-                        unfocusedTextColor = LivriaBlack,
-                        focusedIndicatorColor = LivriaBlue,
-                        unfocusedIndicatorColor = LivriaLightGray,
-                        focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaBlue,
-                        cursorColor = LivriaBlue
+                        focusedContainerColor = LivriaWhite, unfocusedContainerColor = LivriaWhite,
+                        disabledContainerColor = LivriaWhite, focusedTextColor = LivriaBlack,
+                        unfocusedTextColor = LivriaBlack, focusedIndicatorColor = LivriaBlue,
+                        unfocusedIndicatorColor = LivriaLightGray, focusedLabelColor = LivriaBlue,
+                        unfocusedLabelColor = LivriaBlue, cursorColor = LivriaBlue
                     ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp, vertical = 15.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 15.dp)
                 )
 
                 uiState.error?.let { errorMessage ->
@@ -187,10 +133,14 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(50.dp))
 
                 Button(
-                    onClick = viewModel::signInAdmin,
+                    onClick = {
+                        scope.launch {
+                            viewModel.signInAdmin()
+                        }
+                    },
                     enabled = !uiState.isLoading,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = LivriaOrange,
                         contentColor = LivriaWhite
                     ),
@@ -203,7 +153,6 @@ fun LoginScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(50.dp))
-
             }
         }
     }

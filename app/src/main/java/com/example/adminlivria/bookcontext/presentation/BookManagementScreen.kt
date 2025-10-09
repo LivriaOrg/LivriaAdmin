@@ -1,6 +1,6 @@
 package com.example.adminlivria.bookcontext.presentation
-import androidx.navigation.NavController
 
+import androidx.navigation.NavController
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,9 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,47 +21,48 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.adminlivria.R
 import com.example.adminlivria.bookcontext.domain.Book
-import com.example.adminlivria.common.ui.theme.*
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import com.example.adminlivria.bookcontext.domain.BookFilters
+import com.example.adminlivria.bookcontext.domain.SortOption
 import com.example.adminlivria.bookcontext.presentation.components.BookGridTile
 import com.example.adminlivria.common.navigation.NavDestinations
+import com.example.adminlivria.common.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BooksScreen( navController: NavController,
+fun BooksScreen(
+    navController: NavController,
     viewModel: BooksManagementViewModel = viewModel(factory = BooksViewModelFactory(LocalContext.current))
 ) {
     val search by viewModel.search.collectAsState()
     val stats by viewModel.stats.collectAsState()
     val books by viewModel.books.collectAsState()
 
+    val genres by viewModel.genres.collectAsState()
+    val languages by viewModel.languages.collectAsState()
+    val currentFilters by viewModel.filters.collectAsState()
+
+    var showFilters by remember { mutableStateOf(false) }
+
     Scaffold { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxWidth().padding(paddingValues)
         ) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-            ) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                 Text(
                     "Livria Management",
                     textAlign = TextAlign.Center,
                     color = LivriaOrange,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 20.sp
+                        fontWeight = FontWeight.SemiBold, fontSize = 20.sp
                     ),
                     modifier = Modifier.fillMaxWidth().padding(6.dp)
                 )
@@ -71,34 +70,31 @@ fun BooksScreen( navController: NavController,
                     "Statistics",
                     textAlign = TextAlign.Center,
                     color = LivriaBlack,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp
-                    ),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                     modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 18.dp)
                 )
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                    MiniStats(title = "Total Books", value = stats.totalBooks.toString(), modifier = Modifier.weight(1f))
-                    MiniStats(title = "Total Genres", value = stats.totalGenres.toString(), modifier = Modifier.weight(1f))
-                    MiniStats(title = "Average Price", value = "S/ %.2f".format(stats.averagePrice), modifier = Modifier.weight(1f))
+                    MiniStats("Total Books", stats.totalBooks.toString(), Modifier.weight(1f))
+                    MiniStats("Total Genres", stats.totalGenres.toString(), Modifier.weight(1f))
+                    MiniStats("Average Price", "S/ %.2f".format(stats.averagePrice), Modifier.weight(1f))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                    MiniStats(title = "Total Books", value = stats.totalBooksRow1.toString(), modifier = Modifier.weight(1f))
-                    MiniStats(title = "Total Books", value = stats.totalBooksRow2.toString(), modifier = Modifier.weight(1f))
+                    MiniStats("Books in Stock", stats.booksInStock.toString(), Modifier.weight(1f))
+                    MiniStats("Most Reviewed", stats.totalBooksRow2.toString(), Modifier.weight(1f))
                 }
 
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp),
-                    thickness = 2.dp,
-                    color = LivriaSoftCyan
+                    thickness = 2.dp, color = LivriaSoftCyan
                 )
             }
 
 
             SearchNFilterCardBooks(
                 search = search,
-                onSearchChange = { viewModel.onSearch(it) }
+                onSearchChange = { viewModel.onSearch(it) },
+                onOpenFilters = { showFilters = true }
             )
 
 
@@ -112,16 +108,40 @@ fun BooksScreen( navController: NavController,
                 items(books, key = { it.id }) { book ->
                     BookGridTile(
                         book = book,
-                        onView = { navController.navigate("${NavDestinations.BOOK_DETAIL_ROUTE}/${book.id}") }
+                        onView = { navController.navigate("${NavDestinations.BOOK_DETAIL_ROUTE}/${book.id}") },
+                        onStock = { navController.navigate("${NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE}/${book.id}") }
                     )
                 }
             }
         }
     }
+
+
+    if (showFilters) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showFilters = false },
+            sheetState = sheetState
+        ) {
+            FiltersSheet(
+                genres = genres,
+                languages = languages,
+                initial = currentFilters,
+                onApply = {
+                    viewModel.applyFilters(it)
+                    showFilters = false
+                },
+                onClear = {
+                    viewModel.clearFilters()
+                    showFilters = false
+                }
+            )
+        }
+    }
 }
 
 @Composable
-private fun MiniStats(modifier: Modifier = Modifier, title: String, value: String) {
+private fun MiniStats(title: String, value: String, modifier: Modifier = Modifier) {
     OutlinedCard(
         modifier = modifier.padding(6.dp).height(80.dp).width(110.dp),
         colors = cardColors(containerColor = LivriaWhite),
@@ -133,23 +153,15 @@ private fun MiniStats(modifier: Modifier = Modifier, title: String, value: Strin
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = title,
-                textAlign = TextAlign.Center,
-                color = LivriaBlue,
+                text = title, textAlign = TextAlign.Center, color = LivriaBlue,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    fontFamily = AlexandriaFontFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 12.sp
+                    fontFamily = AlexandriaFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 12.sp
                 )
             )
             Text(
-                text = value,
-                textAlign = TextAlign.Center,
-                color = LivriaBlack,
+                text = value, textAlign = TextAlign.Center, color = LivriaBlack,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    fontFamily = AlexandriaFontFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 11.sp
+                    fontFamily = AlexandriaFontFamily, fontWeight = FontWeight.Normal, fontSize = 11.sp
                 ),
                 modifier = Modifier.padding(top = 10.dp)
             )
@@ -160,7 +172,8 @@ private fun MiniStats(modifier: Modifier = Modifier, title: String, value: Strin
 @Composable
 private fun SearchNFilterCardBooks(
     search: String,
-    onSearchChange: (String) -> Unit
+    onSearchChange: (String) -> Unit,
+    onOpenFilters: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
@@ -174,16 +187,13 @@ private fun SearchNFilterCardBooks(
                     text = "BOOK COLLECTION",
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = AsapCondensedFontFamily,
-                        color = LivriaAmber,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp
+                        color = LivriaAmber, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, letterSpacing = 2.sp
                     ),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(2f)
                 )
                 IconButton(
-                    onClick = {  },
+                    onClick = onOpenFilters,
                     modifier = Modifier.size(24.dp).background(Color.Transparent).weight(1f)
                 ) {
                     Icon(
@@ -202,24 +212,16 @@ private fun SearchNFilterCardBooks(
                     label = {
                         Text(
                             text = "Enter a title to search",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp
-                            )
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
                         )
                     },
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = LivriaBlack),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LivriaWhite,
-                        unfocusedContainerColor = LivriaWhite,
-                        disabledContainerColor = LivriaWhite,
-                        focusedTextColor = LivriaBlack,
-                        unfocusedTextColor = LivriaBlack,
-                        focusedIndicatorColor = LivriaBlue,
-                        unfocusedIndicatorColor = LivriaLightGray,
-                        focusedLabelColor = LivriaBlue,
-                        unfocusedLabelColor = LivriaBlue,
-                        cursorColor = LivriaBlue
+                        focusedContainerColor = LivriaWhite, unfocusedContainerColor = LivriaWhite,
+                        disabledContainerColor = LivriaWhite, focusedTextColor = LivriaBlack,
+                        unfocusedTextColor = LivriaBlack, focusedIndicatorColor = LivriaBlue,
+                        unfocusedIndicatorColor = LivriaLightGray, focusedLabelColor = LivriaBlue,
+                        unfocusedLabelColor = LivriaBlue, cursorColor = LivriaBlue
                     ),
                     modifier = Modifier.weight(1f).padding(horizontal = 30.dp, vertical = 15.dp)
                 )
@@ -235,62 +237,6 @@ private fun SearchNFilterCardBooks(
                         modifier = Modifier.height(24.dp)
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BookCard(
-    book: Book,
-    onView: () -> Unit
-) {
-    Card(
-        colors = cardColors(containerColor = LivriaWhite),
-        elevation = cardElevation(defaultElevation = 8.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = book.cover,
-                contentDescription = book.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(10.dp))
-            )
-            Spacer(Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    book.title,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontFamily = AlexandriaFontFamily,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = LivriaBlack
-                )
-                Text(
-                    book.author,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LivriaBlue,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    "S/ %.2f".format(book.price),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LivriaBlack
-                )
-            }
-            Button(
-                onClick = onView,
-                colors = ButtonDefaults.buttonColors(containerColor = LivriaBlue),
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text("VIEW")
             }
         }
     }

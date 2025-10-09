@@ -35,12 +35,15 @@ import com.example.adminlivria.profilecontext.presentation.SettingsViewModel // 
 import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory// Asumo el paquete
 import androidx.compose.runtime.remember // Necesario para memoizar el ViewModel
 import androidx.compose.runtime.collectAsState // Necesario para el capital si el ViewModel lo usa
+import androidx.compose.runtime.rememberCoroutineScope
 
 
 import com.example.adminlivria.bookcontext.presentation.BooksScreen
 import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
 import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
 import com.example.adminlivria.bookcontext.presentation.detail.BookDetailScreen
+import com.example.adminlivria.bookcontext.presentation.stock.StockScreen
+import kotlinx.coroutines.launch
 import com.example.adminlivria.orderscontext.presentation.OrdersViewModel
 import com.example.adminlivria.orderscontext.presentation.OrdersViewModelFactory
 
@@ -52,7 +55,7 @@ fun AdminNavGraph(
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
 
-    // --- 1. DEFINICIÓN DE FACTORÍAS ---
+
     val loginViewModelFactory = LoginViewModelFactory(
         authService = authServiceInstance,
         tokenManager = tokenManager
@@ -108,28 +111,39 @@ fun AdminNavGraph(
 
             composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
+                val scope = rememberCoroutineScope()
+
                 LoginScreen(
-                    viewModel = loginViewModel, // <-- Se pasa el ViewModel
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
-                        // Forzar la carga de datos del admin al iniciar sesión para obtener el capital
-                        settingsViewModel.loadAdminData()
-                        navController.navigate(NavDestinations.HOME_ROUTE) {
-                            popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
+
+                        scope.launch {
+
+                            val settingsJob = launch { settingsViewModel.loadAdminData() }
+                            val booksJob = launch { booksViewModel.refresh() }
+
+
+                            settingsJob.join()
+                            booksJob.join()
+
+
+                            navController.navigate(NavDestinations.HOME_ROUTE) {
+                                popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
+                            }
                         }
                     }
                 )
             }
 
-            // 1. HOME (Rutas que requieren autenticación)
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(navController = navController)
             }
 
-            // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
+
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 SettingsScreen(
-                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
-                    onLogout = { // <-- Se pasa el callback onLogout
+                    viewModel = settingsViewModel,
+                    onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -138,10 +152,10 @@ fun AdminNavGraph(
                 )
             }
 
-            // 3. RUTAS DE LA BARRA INFERIOR
+
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
-                    navController = navController,     // 👈 necesario para navegar al detalle
+                    navController = navController,
                     viewModel = booksViewModel
                 )
             }
@@ -162,15 +176,20 @@ fun AdminNavGraph(
                 }
             }
 
-            // 4. RUTAS DETALLE
+
             composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
                 val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
                 BookDetailScreen(bookId = id)
             }
             composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
-            composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
-        }
+            composable("${NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE}/{bookId}") { backStack ->
+                val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
+                StockScreen(
+                    bookId = id,
+                    settingsViewModel = settingsViewModel
+                )
+            }        }
     }
-    // ELIMINACIÓN DE CODIGO DUPLICADO (ESTO CAUSABA PROBLEMAS)
-    // composable(route = NavDestinations.LOGIN_ROUTE) { ... }
+
+
 }
