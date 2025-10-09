@@ -2,7 +2,7 @@ package com.example.adminlivria.common
 
 import com.example.adminlivria.profilecontext.data.remote.AuthService
 import android.content.Context
-import com.example.adminlivria.data.local.TokenManager
+import com.example.adminlivria.profilecontext.data.local.TokenManager
 import com.example.adminlivria.data.remote.UserAdminService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

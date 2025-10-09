@@ -1,8 +1,7 @@
-package com.example.adminlivria.data.local
+package com.example.adminlivria.profilecontext.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-
 
 class TokenManager(context: Context) {
 
