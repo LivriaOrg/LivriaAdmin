@@ -29,7 +29,7 @@ class OrdersViewModel(
     val state: State<UIState<List<Order>>> get() = _state
 
     init {
-        //loadAllOrders()
+        loadAllOrders()
     }
 
     // ---  Lógica de Búsqueda (Conectada al botón de lupa) ---

@@ -3,6 +3,9 @@ import com.example.adminlivria.orderscontext.domain.Item
 import com.example.adminlivria.orderscontext.domain.Order
 import com.example.adminlivria.orderscontext.domain.Shipping
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 // DTO para la dirección de envío
 data class ShippingDto(
@@ -58,7 +61,12 @@ fun OrderDto.toDomain() = Order(
         isDelivery = isDelivery,
         shipping = shipping.toDomain(),
         total = total,
-        date = Instant.parse(date),
+        date = try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+            LocalDateTime.parse(date, formatter).toInstant(ZoneOffset.UTC)
+        } catch (e: Exception) {
+            Instant.now()
+        },
         items = items.map { it.toDomain() }
     )
 
