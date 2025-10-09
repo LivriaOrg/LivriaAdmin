@@ -38,4 +38,28 @@ interface BookDao {
         clearAll()
         upsertAll(entities)
     }
+
+    @Query("SELECT * FROM books ORDER BY stock DESC LIMIT :limit")
+    suspend fun getTopByStock(limit: Int): List<BookEntity>
+
+    @Query("""
+        SELECT genre, SUM(stock) as count
+        FROM books
+        GROUP BY genre
+        ORDER BY count DESC
+    """)
+    suspend fun countBooksByGenre(): List<GenreCount>
+
+    data class GenreCount(
+        val genre: String,
+        val count: Int
+    )
+
+    @Query("SELECT genre, SUM(stock * price) AS total_monetary_value FROM books GROUP BY genre")
+    fun getGenreMonetaryValue(): List<GenreMonetaryValue>
+
+    data class GenreMonetaryValue(
+        val genre: String,
+        val total_monetary_value: Double
+    )
 }

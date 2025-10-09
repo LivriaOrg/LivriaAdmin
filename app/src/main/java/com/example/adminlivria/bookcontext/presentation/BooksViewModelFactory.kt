@@ -3,7 +3,7 @@ package com.example.adminlivria.bookcontext.presentation
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.adminlivria.bookcontext.data.local.AdminDatabase
+import com.example.adminlivria.common.data.local.AdminDatabase
 import com.example.adminlivria.bookcontext.data.repository.BooksRepository
 import com.example.adminlivria.common.bookServiceInstance
 

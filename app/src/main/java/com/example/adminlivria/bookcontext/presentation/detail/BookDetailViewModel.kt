@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.adminlivria.bookcontext.data.local.AdminDatabase
+import com.example.adminlivria.common.data.local.AdminDatabase
 import com.example.adminlivria.bookcontext.data.repository.BooksRepository
 import com.example.adminlivria.bookcontext.domain.Book
 import com.example.adminlivria.common.bookServiceInstance

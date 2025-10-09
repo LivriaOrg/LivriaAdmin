@@ -41,6 +41,8 @@ import com.example.adminlivria.bookcontext.presentation.BooksScreen
 import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
 import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
 import com.example.adminlivria.bookcontext.presentation.detail.BookDetailScreen
+import com.example.adminlivria.statscontext.presentation.StatsScreen
+import com.example.adminlivria.statscontext.presentation.StatsViewModelFactory
 
 @Composable
 fun AdminNavGraph(
@@ -80,8 +82,7 @@ fun AdminNavGraph(
         factory = BooksViewModelFactory(context)
     )
 
-
-    Scaffold(
+        Scaffold(
         topBar = {
             if (showBars) {
                 LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
@@ -147,11 +148,10 @@ fun AdminNavGraph(
                 AddBookScreen()
             }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
-                val context = LocalContext.current
 
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "STATS!", Toast.LENGTH_SHORT).show()
-                }
+                StatsScreen(
+                    navController = navController,
+                )
             }
 
             // 4. RUTAS DETALLE
@@ -163,6 +163,4 @@ fun AdminNavGraph(
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
         }
     }
-    // ELIMINACIÓN DE CODIGO DUPLICADO (ESTO CAUSABA PROBLEMAS)
-    // composable(route = NavDestinations.LOGIN_ROUTE) { ... }
 }

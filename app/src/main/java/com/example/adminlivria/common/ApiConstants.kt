@@ -2,6 +2,7 @@ package com.example.adminlivria.common
 
 import com.example.adminlivria.profilecontext.data.remote.AuthService
 import android.content.Context
+import com.example.adminlivria.bookcontext.data.local.BookDao
 import com.example.adminlivria.orderscontext.data.local.OrderDao
 import com.example.adminlivria.orderscontext.data.remote.OrderService
 import com.example.adminlivria.orderscontext.data.repository.OrderRepository
@@ -14,8 +15,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 import com.example.adminlivria.bookcontext.data.remote.BookService
+import com.example.adminlivria.bookcontext.data.repository.BooksRepository
+import com.example.adminlivria.common.data.local.AdminDatabase
+import com.example.adminlivria.statscontext.data.local.StatsDao
+import com.example.adminlivria.statscontext.data.repository.StatsRepository // La clase concreta
 
-const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
+const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
 
 private lateinit var tokenManager: TokenManager
 
@@ -81,7 +86,33 @@ val orderServiceInstance: OrderService by lazy {
     retrofit.create(OrderService::class.java)
 }
 
+lateinit var adminDatabaseInstance: AdminDatabase
+
 lateinit var orderDaoInstance: OrderDao
+
+lateinit var bookDaoInstance: BookDao
+
+lateinit var statsDaoInstance: StatsDao
+
+fun initializeDaos(context: Context) {
+    adminDatabaseInstance = AdminDatabase.getInstance(context)
+    bookDaoInstance = adminDatabaseInstance.bookDao()
+    statsDaoInstance = adminDatabaseInstance.statsDao()
+}
+
+val booksRepositoryInstance: BooksRepository by lazy {
+    BooksRepository(
+        dao = bookDaoInstance,
+        service = bookServiceInstance
+    )
+}
+
+val statsRepositoryInstance: StatsRepository by lazy {
+    StatsRepository(
+        dao = statsDaoInstance,
+        bookInfoSource = booksRepositoryInstance
+    )
+}
 
 val orderRepositoryInstance: OrderRepository by lazy {
     OrderRepository(

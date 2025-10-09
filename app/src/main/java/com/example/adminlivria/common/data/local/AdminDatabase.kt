@@ -1,17 +1,22 @@
-package com.example.adminlivria.bookcontext.data.local
+package com.example.adminlivria.common.data.local
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.adminlivria.bookcontext.data.local.BookEntity
+import com.example.adminlivria.bookcontext.data.local.BookDao
+import com.example.adminlivria.statscontext.data.local.StatEntity
+import com.example.adminlivria.statscontext.data.local.StatsDao
 
 @Database(
-    entities = [BookEntity::class],
-    version = 3,
+    entities = [BookEntity::class, StatEntity::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AdminDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
+    abstract fun statsDao(): StatsDao
 
     companion object {
         @Volatile private var INSTANCE: AdminDatabase? = null
