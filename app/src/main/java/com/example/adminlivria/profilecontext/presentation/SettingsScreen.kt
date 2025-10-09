@@ -1,5 +1,6 @@
 package com.example.adminlivria.profilecontext.presentation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -38,9 +39,15 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onLogout: () -> Unit
 ) {
+    val TAG = "SettingsScreen"
     val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        Log.d(TAG, "SettingsScreen composed. VM=${viewModel.hashCode()} capital=${state.capital}")
+    }
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+
 
     LaunchedEffect(state.initialLoadError) {
         if (state.initialLoadError != null) {

@@ -14,7 +14,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-
+import android.util.Log
+private const val TAG = "SettingsVM"
 
 data class SettingsUiState(
     val display: String = "",
@@ -47,6 +48,7 @@ class SettingsViewModel(
     private val adminId: Int = tokenManager.getAdminId()
 
     init {
+        // opcional: intentar cargar — pero loadAdminData leerá adminId en tiempo de ejecución
         viewModelScope.launch {
             loadAdminData()
         }
@@ -93,6 +95,8 @@ class SettingsViewModel(
 
 
     suspend fun loadAdminData() {
+        val adminId = tokenManager.getAdminId()
+
         if (adminId == 0) {
             _uiState.update { it.copy(initialLoadError = "Error: Sesión no válida. Por favor, vuelva a iniciar sesión.", isLoading = false) }
             return
@@ -100,41 +104,38 @@ class SettingsViewModel(
 
         _uiState.update { it.copy(isLoading = true, initialLoadError = null) }
 
-            try {
-                val response = userAdminService.getUserAdminData()
-
-                if (response.isSuccessful) {
-                    val adminList = response.body()
-                    val adminDto = adminList?.firstOrNull()
-                    adminDto?.let {
-                        _uiState.update { state ->
-                            state.copy(
-                                display = it.display,
-                                username = it.username,
-                                email = it.email,
-                                securityPin = it.securityPin,
-                                capital = adminDto.capital,
-                                isLoading = false
-                            )
-                        }
+        try {
+            val response = userAdminService.getUserAdminData()
+            Log.d(TAG, "response code=${response.code()} successful=${response.isSuccessful} body=${response.body()}")
+            if (response.isSuccessful) {
+                val adminDto = response.body()?.firstOrNull()
+                adminDto?.let {
+                    _uiState.update { state ->
+                        state.copy(
+                            display = it.display,
+                            username = it.username,
+                            email = it.email,
+                            securityPin = it.securityPin,
+                            capital = it.capital,
+                            isLoading = false
+                        )
                     }
-                } else {
-                    _uiState.update { it.copy(
-                        initialLoadError = "No se pudieron cargar los datos. (Error ${response.code()})",
-                        isLoading = false
-                    ) }
+                } ?: run {
+                    _uiState.update { it.copy(initialLoadError = "No hay datos de admin.", isLoading = false) }
                 }
-            } catch (e: Exception) {
-                val errorMsg = when (e) {
-                    is HttpException -> "Error de servidor al cargar: ${e.message()}"
-                    is IOException -> "Error de conexión al cargar. Verifique su red."
-                    else -> "Ocurrió un error inesperado al cargar los datos."
-                }
-                _uiState.update { it.copy(initialLoadError = errorMsg, isLoading = false) }
+            } else {
+                _uiState.update { it.copy(initialLoadError = "No se pudieron cargar los datos. (Error ${response.code()})", isLoading = false) }
             }
-
+        } catch (e: Exception) {
+            Log.d(TAG, "Exception en loadAdminData: ${e.message}", e)
+            val errorMsg = when (e) {
+                is retrofit2.HttpException -> "Error de servidor: ${e.message()}"
+                is java.io.IOException -> "Error de conexión"
+                else -> "Error inesperado"
+            }
+            _uiState.update { it.copy(initialLoadError = errorMsg, isLoading = false) }
+        }
     }
-
 
     fun saveChanges() {
         if (adminId == 0 || uiState.value.display.isBlank() || uiState.value.username.isBlank() || uiState.value.email.isBlank() || uiState.value.securityPin.isBlank()) {
