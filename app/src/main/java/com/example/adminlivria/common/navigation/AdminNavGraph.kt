@@ -139,11 +139,7 @@ fun AdminNavGraph(
                 OrdersScreen(navController = navController)
             }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                val context = LocalContext.current
-
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "INVENTORY!", Toast.LENGTH_SHORT).show()
-                }
+                AddBookScreen()
             }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
                 val context = LocalContext.current

@@ -13,8 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
-
+const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
 private lateinit var tokenManager: TokenManager
 
 fun initializeTokenManager(context: Context) {
