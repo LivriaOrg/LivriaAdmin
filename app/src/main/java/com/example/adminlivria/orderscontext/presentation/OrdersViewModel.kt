@@ -49,8 +49,16 @@ class OrdersViewModel(
 
     // Obtener todas las órdenes
     fun loadAllOrders() {
+        _state.value = UIState(isLoading = true)
         viewModelScope.launch {
-            repository.getAllOrders()
+            when (val result = repository.getAllOrders()) {
+                is Resource.Success -> {
+                    _state.value = UIState(data = result.data)
+                }
+                is Resource.Error -> {
+                    _state.value = UIState(message = result.message ?: "Error loading orders")
+                }
+            }
         }
     }
 

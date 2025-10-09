@@ -129,14 +129,14 @@ fun OrdersScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 18.dp),
+                    .padding(vertical = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Encabezados
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp),
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("CODE",
@@ -144,7 +144,7 @@ fun OrdersScreen(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center                    
+                        textAlign = TextAlign.Center
                     )
                     Text("NAME",
                         color = LivriaNavyBlue,
@@ -177,6 +177,7 @@ fun OrdersScreen(
                 }
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                         .padding(bottom = 18.dp),
                     thickness = 2.dp,
                     color = LivriaSoftCyan
@@ -392,9 +393,8 @@ fun OrderRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 12.dp, horizontal = 18.dp)
             .border(1.dp, LivriaLightGray, shape = MaterialTheme.shapes.small)
-            .padding(vertical = 8.dp)
             .clickable { onClick() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -404,16 +404,30 @@ fun OrderRow(
             color = LivriaOrange,
             fontWeight = FontWeight.SemiBold,
             fontSize = 13.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
-        Text(order.userFullName, fontSize = 12.sp, modifier = Modifier.weight(1f))
-        Text(formattedDate, fontSize = 12.sp, modifier = Modifier.weight(1f))
-        Text("S/ ${order.total}", fontSize = 12.sp, modifier = Modifier.weight(1f))
+        Text(
+            text = order.userFullName,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f))
+        Text(
+            text = formattedDate,
+            textAlign = TextAlign.Center,
+            fontSize = 12.sp,
+            modifier = Modifier.weight(1f))
+        Text(
+            text = "S/ ${order.total}",
+            textAlign = TextAlign.Center,
+            fontSize = 12.sp,
+            modifier = Modifier.weight(1f))
         Text(
             text = order.status.uppercase(),
             color = if (order.status == "pending") LivriaOrange else LivriaBlue,
             fontWeight = FontWeight.Medium,
             fontSize = 12.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
     }
