@@ -47,21 +47,21 @@ class OrderRepository(
         }
     }
 
-    // PUT /orders/{orderId}/status - Actualizar el estado de una orden
-    /*suspend fun updateOrderStatus(orderId: Int, newStatus: String): Resource<Unit> = withContext(Dispatchers.IO) {
+    // PUT -  Actualizar el estado de una orden
+    suspend fun updateOrderStatus(orderId: Int, newStatus: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Cuerpo de la petición: {"status": "NUEVO_ESTADO"}
-            val statusUpdateBody = mapOf("status" to newStatus)
-            val response = service.updateOrderStatus(orderId, statusUpdateBody)
+            val statusUpdate = mapOf("status" to newStatus)
+            val response = service.updateOrderStatus(orderId, statusUpdate)
 
             if (response.isSuccessful) {
-                return@withContext Resource.Success(data = Unit)
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(response.errorBody()?.string() ?: "Error updating order")
             }
-            return@withContext Resource.Error(response.errorBody()?.string() ?: "Error updating order status")
         } catch (e: Exception) {
-            return@withContext Resource.Error(e.message ?: "Error de red al actualizar estado")
+            Resource.Error(e.message ?: "Network error")
         }
-    }*/
+    }
 
     // SEARCH
     suspend fun searchOrders(input: String): Resource<List<Order>> = withContext(Dispatchers.IO) {

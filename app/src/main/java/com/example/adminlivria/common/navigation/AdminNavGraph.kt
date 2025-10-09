@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import com.example.adminlivria.orderscontext.presentation.OrdersViewModel
 import com.example.adminlivria.orderscontext.presentation.OrdersViewModelFactory
 import com.example.adminlivria.orderscontext.presentation.orderdetail.OrderDetailScreen
+import com.example.adminlivria.searchcontext.presentation.HomeViewModelFactory
 
 @Composable
 fun AdminNavGraph(
@@ -57,7 +58,6 @@ fun AdminNavGraph(
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
     Log.d("AdminNavGraph", "token=${tokenManager.getToken()} adminId=${tokenManager.getAdminId()}")
-
 
 
     val loginViewModelFactory = LoginViewModelFactory(
@@ -82,14 +82,10 @@ fun AdminNavGraph(
         factory = settingsViewModelFactory
     )
 
-
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
-
-    val adminUser = AdminUser.mock().copy(capital = settingsState.capital)
 
 
     val booksViewModel: BooksManagementViewModel = viewModel(

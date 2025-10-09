@@ -3,6 +3,7 @@ package com.example.adminlivria.orderscontext.presentation.orderdetail
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,10 +17,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +44,7 @@ import com.example.adminlivria.common.ui.theme.LivriaAmber
 import com.example.adminlivria.common.ui.theme.LivriaBlack
 import com.example.adminlivria.common.ui.theme.LivriaBlue
 import com.example.adminlivria.common.ui.theme.LivriaLightGray
+import com.example.adminlivria.common.ui.theme.LivriaNavyBlue
 import com.example.adminlivria.common.ui.theme.LivriaOrange
 import com.example.adminlivria.common.ui.theme.LivriaSoftCyan
 import com.example.adminlivria.common.ui.theme.LivriaWhite
@@ -106,7 +115,43 @@ fun OrderDetailScreen(
 
                     // --- UPDATE STATUS ---
                     SectionTitle("UPDATE STATUS")
-                    //
+
+                    var expanded by remember { mutableStateOf(false) }
+                    val statusOptions = listOf("Pending", "In Progress", "Delivered")
+                    val selectedStatus = remember { mutableStateOf(order.status) }
+
+                    Box {
+                        OutlinedButton(
+                            onClick = { expanded = true },
+                            border = BorderStroke(1.dp, LivriaBlue)
+                        ) {
+                            Text(
+                                text = selectedStatus.value.uppercase(),
+                                color = LivriaBlue,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            statusOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(
+                                        text = option
+                                    ) },
+                                    onClick = {
+                                        expanded = false
+                                        selectedStatus.value = option
+                                        viewModel.updateOrderStatus(order.id, option.lowercase())
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                 }
             }
         }

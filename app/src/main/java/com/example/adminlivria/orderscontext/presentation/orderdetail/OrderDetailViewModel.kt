@@ -26,6 +26,25 @@ class OrderDetailViewModel(
         loadOrderDetail()
     }
 
+    fun updateOrderStatus(orderId: Int, newStatus: String) {
+        viewModelScope.launch {
+            _state.value = UIState(isLoading = true)
+
+            val result = repository.updateOrderStatus(orderId, newStatus)
+            if (result is Resource.Success) {
+                // Recargar la orden actualizada
+                val refreshed = repository.getOrderById(orderId)
+                if (refreshed is Resource.Success) {
+                    _state.value = UIState(data = refreshed.data)
+                } else {
+                    _state.value = UIState(message = refreshed.message ?: "Error refreshing data")
+                }
+            } else {
+                _state.value = UIState(message = result.message ?: "Failed to update status")
+            }
+        }
+    }
+
     private fun loadOrderDetail() {
         viewModelScope.launch {
             _state.value = UIState(isLoading = true)
