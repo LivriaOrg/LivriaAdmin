@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,13 +26,34 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: SettingsViewModel,
+    onLogout: () -> Unit
 ) {
     val state = viewModel.uiState
 
-    Scaffold { paddingValues ->
+    // Configuración del Snackbar para mostrar mensajes de éxito/error
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Manejo de errores de carga inicial
+    LaunchedEffect(state.initialLoadError) {
+        if (state.initialLoadError != null) {
+            snackbarHostState.showSnackbar("Error al cargar datos: ${state.initialLoadError}")
+        }
+    }
+
+    // Manejo de éxito al guardar
+    LaunchedEffect(state.saveSuccess) {
+        if (state.saveSuccess) {
+            snackbarHostState.showSnackbar("¡Datos actualizados exitosamente!")
+        }
+    }
+
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(paddingValues)
+            modifier = Modifier.fillMaxWidth().padding(paddingValues)
         ) {
             if (state.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -53,7 +76,7 @@ fun SettingsScreen(
                     ) {
                         SettingsHeader()
                         Spacer(modifier = Modifier.height(18.dp))
-                        WelcomeCard(state.user.username, state.user.fullName)
+                        WelcomeCard(state.username, state.display)
                         Spacer(modifier = Modifier.height(18.dp))
                         TabSelector(
                             isProfileSelected = state.isProfileTabSelected,
@@ -62,9 +85,9 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.height(18.dp))
                         if (state.isProfileTabSelected) {
-                            ProfileSettingsContent(state, viewModel)
+                            ProfileSettingsContent(state, viewModel, onLogout)
                         } else {
-                            ApplicationSettingsContent(viewModel)
+                            ApplicationSettingsContent(viewModel, onLogout)
                         }
                     }
                 }
@@ -218,7 +241,11 @@ fun TabSelector(
 // ---------- Profile Content ----------
 
 @Composable
-fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel) {
+fun ProfileSettingsContent(
+    state: SettingsUiState,
+    viewModel: SettingsViewModel,
+    onLogout: () -> Unit
+) {
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -234,8 +261,9 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
 
+        // Campo Display (anteriormente FullName en el mock)
         OutlinedTextField(
-            value = state.user.fullName,
+            value = state.display,
             onValueChange = { viewModel.updateField("fullName", it) },
             label = {
                 Text(
@@ -262,8 +290,9 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
                 .padding(bottom = 8.dp)
         )
 
+        // Campo Email
         OutlinedTextField(
-            value = state.user.email,
+            value = state.email,
             onValueChange = { viewModel.updateField("email", it) },
             label = {
                 Text(
@@ -290,6 +319,7 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
                 .padding(bottom = 8.dp)
         )
 
+        // Campo Security Pin
         OutlinedTextField(
             value = state.securityPin,
             onValueChange = { viewModel.updateField("securityPin", it) },
@@ -327,14 +357,27 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
             )
         }
 
+        if (state.saveError != null) {
+            Text(
+                "Error: ${state.saveError}",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 8.dp),
+                fontFamily = AlexandriaFontFamily
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
+
             Button(
-                onClick = viewModel::logout,
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
                 enabled = !state.isSaving,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -369,7 +412,10 @@ fun ProfileSettingsContent(state: SettingsUiState, viewModel: SettingsViewModel)
 // ---------- Application Content ----------
 
 @Composable
-fun ApplicationSettingsContent(viewModel: SettingsViewModel) {
+fun ApplicationSettingsContent(
+    viewModel: SettingsViewModel,
+    onLogout: () -> Unit
+) {
     val state = viewModel.uiState
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -401,7 +447,6 @@ fun ApplicationSettingsContent(viewModel: SettingsViewModel) {
             onToggle = { viewModel.updateApplicationSetting("emailAlerts", it) }
         )
 
-        // 3. Auto Save
         SettingRow(
             title = "Auto Save",
             description = "Automatically save changes",
@@ -409,7 +454,7 @@ fun ApplicationSettingsContent(viewModel: SettingsViewModel) {
             onToggle = { viewModel.updateApplicationSetting("autoSave", it) }
         )
 
-        // --- SECCIÓN DE BOTONES (Duplicado de ProfileSettingsContent) ---
+        // --- SECCIÓN DE BOTONES ---
 
         if (state.saveSuccess) {
             Text(
@@ -421,14 +466,28 @@ fun ApplicationSettingsContent(viewModel: SettingsViewModel) {
             )
         }
 
-        Spacer(modifier = Modifier.height(18.dp)) // Espacio extra para separarlo de los toggles
+        if (state.saveError != null) {
+            Text(
+                "Error: ${state.saveError}",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 8.dp),
+                fontFamily = AlexandriaFontFamily,
+                fontSize = 12.sp
+            )
+        }
+
+
+        Spacer(modifier = Modifier.height(18.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             OutlinedButton(
-                onClick = viewModel::logout,
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
                 enabled = !state.isSaving,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -457,11 +516,9 @@ fun ApplicationSettingsContent(viewModel: SettingsViewModel) {
                 }
             }
         }
-        // --- FIN SECCIÓN DE BOTONES ---
     }
 }
 
-// Componente reusable para cada fila de configuración (el YES/NO)
 @Composable
 fun SettingRow(
     title: String,
@@ -494,7 +551,6 @@ fun SettingRow(
             )
         }
 
-        // El control YES/NO (Usamos dos Buttons/Chips para imitar tu diseño)
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
