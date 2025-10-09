@@ -1,5 +1,7 @@
 package com.example.adminlivria.orderscontext.domain
 
+import java.time.Instant
+
 data class Order(
     val id: Int,
     val code: String,
@@ -12,6 +14,6 @@ data class Order(
     val isDelivery: Boolean,
     val shipping: Shipping,
     val total: Double,
-    val date: String,
+    val date: Instant,
     val items: List<Item>
 )
