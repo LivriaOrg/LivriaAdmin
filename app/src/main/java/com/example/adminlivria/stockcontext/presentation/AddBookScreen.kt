@@ -78,28 +78,12 @@ fun AddBookScreen() {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Añadir Nuevo Libro",
-                        fontFamily = AsapCondensedFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = LivriaBlue
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = LivriaYellowLight.copy(alpha = 0.35f)
-                )
-            )
-        }
-    ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .background(LivriaYellowLight.copy(alpha = 0.1f)) // Fondo suave
+                // 2. CAMBIAMOS EL BACKGROUND PRINCIPAL A BLANCO
+                .background(LivriaWhite)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
@@ -109,8 +93,8 @@ fun AddBookScreen() {
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(16.dp),
-                colors = CardDefaults.cardColors(containerColor = LivriaWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                // 3. CAMBIAMOS EL COLOR DE LA CARD A AMARILLO (50% OPACIDAD)
+                colors = CardDefaults.cardColors(containerColor = LivriaYellowLight.copy(alpha = 0.35f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
@@ -120,7 +104,8 @@ fun AddBookScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "AÑADIR AL INVENTARIO",
+                        // 4. TRADUCIMOS EL TÍTULO
+                        text = "ADD TO INVENTORY",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontFamily = AsapCondensedFontFamily,
@@ -132,42 +117,42 @@ fun AddBookScreen() {
                         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
                     )
 
-                    // 1. INPUTS DE TEXTO
+                    // 1. INPUTS DE TEXTO - TRADUCIDOS
                     InputTextField(
-                        label = "Título",
+                        label = "Title", // TRADUCIDO
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange
                     )
                     InputTextField(
-                        label = "Autor",
+                        label = "Author", // TRADUCIDO
                         value = uiState.author,
                         onValueChange = viewModel::onAuthorChange
                     )
                     InputTextField(
-                        label = "Descripción",
+                        label = "Description", // TRADUCIDO
                         value = uiState.description,
                         onValueChange = viewModel::onDescriptionChange,
                         singleLine = false,
                         maxLines = 4
                     )
                     InputTextField(
-                        label = "Stock",
+                        label = "Stock", // TRADUCIDO
                         value = uiState.stock,
                         onValueChange = viewModel::onStockChange,
                         keyboardType = KeyboardType.Number
                     )
 
-                    // 2. SELECTOR DE GÉNERO
+                    // 2. SELECTOR DE GÉNERO - TRADUCIDO
                     OptionSelector(
-                        label = "Género",
+                        label = "Genre", // TRADUCIDO
                         options = BookOptions.GENRE_OPTIONS,
                         selectedOption = uiState.genre,
                         onSelect = viewModel::onGenreSelected
                     )
 
-                    // 3. SELECTOR DE IDIOMA
+                    // 3. SELECTOR DE IDIOMA - TRADUCIDO
                     OptionSelector(
-                        label = "Idioma",
+                        label = "Language", // TRADUCIDO
                         options = BookOptions.LANGUAGE_OPTIONS,
                         selectedOption = uiState.language,
                         onSelect = viewModel::onLanguageSelected
@@ -183,27 +168,30 @@ fun AddBookScreen() {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 5. BOTÓN DE ENVÍO
+                    // 5. BOTÓN DE ENVÍO - TRADUCIDO Y CON NUEVOS COLORES
                     Button(
                         onClick = viewModel::submitBook,
                         enabled = !uiState.isLoading,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp) // Mayor altura
-                            .clip(RoundedCornerShape(12.dp)), // Bordes redondeados
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp)),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = LivriaOrange, // Color contrastante
-                            contentColor = LivriaWhite
+                            // Fondo LivriaYellowLight
+                            containerColor = LivriaYellowLight,
+                            // Fuente LivriaBlue (asumiendo que es tu color "Navy Blue" más oscuro)
+                            contentColor = LivriaBlue
                         )
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
-                                color = LivriaWhite,
+                                color = LivriaBlue, // Usamos LivriaBlue para el spinner
                                 modifier = Modifier.size(28.dp)
                             )
                         } else {
+                            // TRADUCIDO
                             Text(
-                                "AÑADIR LIBRO",
+                                "ADD BOOK",
                                 fontFamily = AlexandriaFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp
@@ -233,7 +221,7 @@ fun AddBookScreen() {
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
-}
+
 
 // ---------------- Componentes Reutilizables ----------------
 
@@ -263,9 +251,9 @@ private fun InputTextField(
             color = Color.Black
         ),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-            unfocusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-            disabledContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
+            focusedContainerColor = LivriaWhite,
+            unfocusedContainerColor = LivriaWhite,
+            disabledContainerColor = LivriaWhite,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -321,9 +309,9 @@ private fun OptionSelector(
             color = Color.Black
         ),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-            unfocusedContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-            disabledContainerColor = LivriaSoftCyan.copy(alpha = 0.5f),
+            focusedContainerColor = LivriaWhite,
+            unfocusedContainerColor = LivriaWhite,
+            disabledContainerColor = LivriaWhite,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -388,7 +376,7 @@ private fun CoverImagePicker(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Portada del Libro",
+            "Book Cover",
             style = MaterialTheme.typography.titleMedium.copy(
                 fontFamily = AlexandriaFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -431,7 +419,7 @@ private fun CoverImagePicker(
                         tint = LivriaBlue.copy(alpha = 0.6f)
                     )
                     Text(
-                        "Toca para seleccionar",
+                        "Tap to select",
                         color = LivriaBlue.copy(alpha = 0.6f),
                         fontSize = 14.sp
                     )
@@ -459,7 +447,7 @@ private fun CoverImagePicker(
             ) {
                 Icon(Icons.Filled.Image, contentDescription = "Galería", modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Galería")
+                Text("Gallery")
             }
 
             // Botón para Cámara (requiere implementación de permisos y TakePicture)
@@ -479,12 +467,12 @@ private fun CoverImagePicker(
             ) {
                 Icon(Icons.Filled.CameraAlt, contentDescription = "Cámara", modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Cámara")
+                Text("Camera")
             }
         }
         if (currentUri.isNotBlank()) {
             Text(
-                text = "Imagen seleccionada",
+                text = "Image selected",
                 style = MaterialTheme.typography.bodySmall,
                 color = LivriaBlue,
                 modifier = Modifier.padding(top = 8.dp)
