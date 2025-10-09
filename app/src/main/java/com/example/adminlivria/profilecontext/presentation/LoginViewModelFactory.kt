@@ -1,4 +1,4 @@
-package com.example.adminlivria.presentation.login
+package com.example.adminlivria.profilecontext.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

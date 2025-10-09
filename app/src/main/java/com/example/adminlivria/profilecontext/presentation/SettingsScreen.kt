@@ -16,7 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+// Importaciones clave para la corrección
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+// Fin de importaciones clave
 import androidx.compose.ui.graphics.Color
 import com.example.adminlivria.common.ui.theme.AlexandriaFontFamily
 import com.example.adminlivria.common.ui.theme.AsapCondensedFontFamily
@@ -35,7 +38,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onLogout: () -> Unit
 ) {
-    val state = viewModel.uiState
+    // CORRECCIÓN: Colectar el StateFlow para obtener el objeto SettingsUiState
+    val state by viewModel.uiState.collectAsState()
 
     // Configuración del Snackbar para mostrar mensajes de éxito/error
     val snackbarHostState = remember { SnackbarHostState() }
@@ -422,7 +426,8 @@ fun ApplicationSettingsContent(
     viewModel: SettingsViewModel,
     onLogout: () -> Unit
 ) {
-    val state = viewModel.uiState
+    // CORRECCIÓN: Colectar el StateFlow para obtener el objeto SettingsUiState
+    val state by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(

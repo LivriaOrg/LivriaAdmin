@@ -1,6 +1,6 @@
-package com.example.adminlivria.data.remote
+package com.example.adminlivria.profilecontext.data.remote
 
-import com.example.adminlivria.data.model.UserAdminDto
+import com.example.adminlivria.profilecontext.data.model.UserAdminDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
