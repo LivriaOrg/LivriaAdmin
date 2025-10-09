@@ -1,4 +1,5 @@
 package com.example.adminlivria.bookcontext.presentation
+import androidx.navigation.NavController
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -34,9 +35,10 @@ import com.example.adminlivria.common.ui.theme.*
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import com.example.adminlivria.bookcontext.presentation.components.BookGridTile
+import com.example.adminlivria.common.navigation.NavDestinations
 
 @Composable
-fun BooksScreen(
+fun BooksScreen( navController: NavController,
     viewModel: BooksManagementViewModel = viewModel(factory = BooksViewModelFactory(LocalContext.current))
 ) {
     val search by viewModel.search.collectAsState()
@@ -49,7 +51,7 @@ fun BooksScreen(
                 .fillMaxWidth()
                 .padding(paddingValues)
         ) {
-            // Encabezado y estadísticas
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -93,15 +95,15 @@ fun BooksScreen(
                 )
             }
 
-            // Tarjeta de búsqueda
+
             SearchNFilterCardBooks(
                 search = search,
                 onSearchChange = { viewModel.onSearch(it) }
             )
 
-            // Grid de cards (2 columnas)
+
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 168.dp), // ≈ 2 columnas en phone
+                columns = GridCells.Adaptive(minSize = 168.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -110,7 +112,7 @@ fun BooksScreen(
                 items(books, key = { it.id }) { book ->
                     BookGridTile(
                         book = book,
-                        onView = { /* TODO: navegar a detalle */ }
+                        onView = { navController.navigate("${NavDestinations.BOOK_DETAIL_ROUTE}/${book.id}") }
                     )
                 }
             }
@@ -181,7 +183,7 @@ private fun SearchNFilterCardBooks(
                     modifier = Modifier.weight(2f)
                 )
                 IconButton(
-                    onClick = { /* TODO filtros */ },
+                    onClick = {  },
                     modifier = Modifier.size(24.dp).background(Color.Transparent).weight(1f)
                 ) {
                     Icon(
@@ -223,7 +225,7 @@ private fun SearchNFilterCardBooks(
                 )
 
                 IconButton(
-                    onClick = { /* ejecutar búsqueda explícita si quieres */ },
+                    onClick = {  },
                     modifier = Modifier.padding(end = 16.dp).size(24.dp).background(Color.Transparent)
                 ) {
                     Icon(

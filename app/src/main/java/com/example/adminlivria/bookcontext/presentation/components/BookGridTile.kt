@@ -30,7 +30,7 @@ fun BookGridTile(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Portada con proporción 3:4 para verse prolija
+
             AsyncImage(
                 model = book.cover,
                 contentDescription = book.title,

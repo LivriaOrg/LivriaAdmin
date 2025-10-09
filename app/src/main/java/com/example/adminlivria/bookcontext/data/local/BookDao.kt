@@ -29,7 +29,10 @@ interface BookDao {
     @Query("DELETE FROM books")
     suspend fun clearAll()
 
-    // Reemplaza todo en una transacción
+    @Query("SELECT * FROM books WHERE id = :id")
+    fun getById(id: Int): Flow<BookEntity?>
+
+
     @androidx.room.Transaction
     suspend fun replaceAll(entities: List<BookEntity>) {
         clearAll()

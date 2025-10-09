@@ -9,13 +9,8 @@ data class BookDto(
     val title: String,
     val description: String,
     val author: String,
-
-    @SerializedName("salePrice")
-    val salePrice: Double?,          // <- viene del backend
-
-    @SerializedName("purchasePrice")
-    val purchasePrice: Double?,      // <- si quieres usarlo luego
-
+    @SerializedName("salePrice") val salePrice: Double?,
+    @SerializedName("purchasePrice") val purchasePrice: Double?,
     val stock: Int,
     val cover: String,
     val genre: String,
@@ -29,7 +24,8 @@ fun BookDto.toDomain() = Book(
     author = author,
     genre = genre,
     language = language,
-    price = salePrice ?: 0.0,        // <- Usamos salePrice como price
+    price = salePrice ?: 0.0,
+    purchasePrice = purchasePrice ?: 0.0,
     stock = stock,
     cover = cover
 )

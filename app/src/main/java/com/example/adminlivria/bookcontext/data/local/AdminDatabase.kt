@@ -7,16 +7,14 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [BookEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AdminDatabase : RoomDatabase() {
-
     abstract fun bookDao(): BookDao
 
     companion object {
-        @Volatile
-        private var INSTANCE: AdminDatabase? = null
+        @Volatile private var INSTANCE: AdminDatabase? = null
 
         fun getInstance(context: Context): AdminDatabase =
             INSTANCE ?: synchronized(this) {
@@ -25,10 +23,8 @@ abstract class AdminDatabase : RoomDatabase() {
                     AdminDatabase::class.java,
                     "admin_livria.db"
                 )
-                    // ⚡ Permite recrear la base cuando el esquema cambia
                     .fallbackToDestructiveMigration()
-                    .build()
-                    .also { INSTANCE = it }
+                    .build().also { INSTANCE = it }
             }
     }
 }

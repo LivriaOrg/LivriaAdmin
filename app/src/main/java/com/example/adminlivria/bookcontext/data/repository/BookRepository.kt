@@ -15,7 +15,7 @@ class BooksRepository(
     fun getBooks(): Flow<List<Book>> =
         dao.getAll().map { list -> list.map { it.toDomain() } }
 
-    // 👇 NUEVO: stream que reacciona al query
+
     fun streamBooks(queryFlow: Flow<String>): Flow<List<Book>> =
         queryFlow
             .map { it.trim() }
@@ -38,6 +38,7 @@ class BooksRepository(
             android.util.Log.e("BooksRepo", "refreshBooks error", e)
         }
     }
-
+    fun getBookById(id: Int): Flow<Book?> =
+        dao.getById(id).map { it?.toDomain() }
     suspend fun isEmpty(): Boolean = dao.count() == 0
 }

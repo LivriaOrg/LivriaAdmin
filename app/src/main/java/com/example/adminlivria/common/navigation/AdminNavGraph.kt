@@ -26,16 +26,17 @@ import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFact
 import com.example.adminlivria.searchcontext.presentation.HomeScreen
 import com.example.adminlivria.orderscontext.presentation.OrdersScreen
 
-// Token / services
+
 import com.example.adminlivria.profilecontext.data.local.TokenManager
 import com.example.adminlivria.common.authServiceInstance
 import com.example.adminlivria.common.userAdminServiceInstance
 import com.example.adminlivria.common.initializeTokenManager
 
-// 🔹 Books (usa el paquete correcto: bookscontext)
+
 import com.example.adminlivria.bookcontext.presentation.BooksScreen
 import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
 import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
+import com.example.adminlivria.bookcontext.presentation.detail.BookDetailScreen
 
 @Composable
 fun AdminNavGraph(
@@ -45,7 +46,6 @@ fun AdminNavGraph(
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
 
-    // Factories
     val loginViewModelFactory = LoginViewModelFactory(
         authService = authServiceInstance,
         tokenManager = tokenManager
@@ -55,58 +55,37 @@ fun AdminNavGraph(
         tokenManager = tokenManager
     )
 
-    // VM compartido para TopBar
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
-        "No ViewModelStoreOwner was provided."
-    }
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val settingsViewModel: SettingsViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
         factory = settingsViewModelFactory
     )
-
     val settingsState by settingsViewModel.uiState.collectAsState()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    val adminUser = AdminUser.mock().copy(
-        capital = settingsState.capital
-    )
+    val adminUser = AdminUser.mock().copy(capital = settingsState.capital)
 
-    // 🔹 BooksViewModel con Factory (Room dentro)
+
     val booksViewModel: BooksManagementViewModel = viewModel(
         factory = BooksViewModelFactory(context)
     )
 
     Scaffold(
-        topBar = {
-            if (showBars) {
-                LivriaTopBar(
-                    navController = navController,
-                    currentRoute = currentRoute,
-                    currentUser = adminUser
-                )
-            }
-        },
-        bottomBar = {
-            if (showBars) {
-                LivriaBottomNavBar(navController = navController)
-            }
-        }
+        topBar = { if (showBars) LivriaTopBar(navController, currentRoute, adminUser) },
+        bottomBar = { if (showBars) LivriaBottomNavBar(navController) }
     ) { paddingValues ->
 
         NavHost(
             navController = navController,
             startDestination = if (tokenManager.getToken() != null)
-                NavDestinations.HOME_ROUTE
-            else
-                NavDestinations.LOGIN_ROUTE,
+                NavDestinations.HOME_ROUTE else NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // LOGIN
-            composable(route = NavDestinations.LOGIN_ROUTE) {
+            composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
                 LoginScreen(
                     viewModel = loginViewModel,
@@ -119,13 +98,13 @@ fun AdminNavGraph(
                 )
             }
 
-            // HOME
-            composable(route = NavDestinations.HOME_ROUTE) {
+
+            composable(NavDestinations.HOME_ROUTE) {
                 HomeScreen(navController = navController)
             }
 
-            // SETTINGS (TopBar)
-            composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
+
+            composable(NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 SettingsScreen(
                     viewModel = settingsViewModel,
                     onLogout = {
@@ -137,25 +116,30 @@ fun AdminNavGraph(
                 )
             }
 
-            // 🔹 BOTTOM BAR ROUTES
-            composable(route = NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
-                // Pasamos el VM inyectado (opcional, pero recomendado para compartir estado)
-                BooksScreen(viewModel = booksViewModel)
-            }
-            composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
-                OrdersScreen(navController = navController)
-            }
-            composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                // TODO: InventoryScreen()
-            }
-            composable(route = NavDestinations.STATISTICS_ROUTE) {
-                // TODO: StatisticsScreen()
+
+            composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
+                BooksScreen(
+                    navController = navController,     // 👈 necesario para navegar al detalle
+                    viewModel = booksViewModel
+                )
             }
 
-            // Detalles
-            composable(route = NavDestinations.BOOK_DETAIL_ROUTE) { /* TODO */ }
-            composable(route = NavDestinations.ORDER_DETAIL_ROUTE) { /* TODO */ }
-            composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) { /* TODO */ }
+
+            composable(NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
+                OrdersScreen(navController = navController)
+            }
+
+            composable(NavDestinations.INVENTORY_ADD_BOOK_ROUTE) { /* TODO */ }
+            composable(NavDestinations.STATISTICS_ROUTE) { /* TODO */ }
+
+
+            composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
+                val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
+                BookDetailScreen(bookId = id)
+            }
+
+
+
         }
     }
 }

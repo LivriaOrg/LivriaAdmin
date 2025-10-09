@@ -18,12 +18,10 @@ class BooksManagementViewModel(
     val search: StateFlow<String> = _search
     fun onSearch(newValue: String) { _search.value = newValue }
 
-    // 👇 CAMBIO: libros filtrados por búsqueda con debounce
     val books: StateFlow<List<Book>> =
         repository.streamBooks(_search.debounce(300))
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    // Stats calculadas sobre la lista visible (filtrada)
     val stats: StateFlow<BooksStats> =
         books.map { list ->
             val total = list.size
