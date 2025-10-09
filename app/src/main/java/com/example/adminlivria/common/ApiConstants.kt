@@ -1,15 +1,16 @@
 package com.example.adminlivria.common
 
-import com.example.adminlivria.profilecontext.data.remote.AuthService
 import android.content.Context
 import com.example.adminlivria.profilecontext.data.local.TokenManager
+import com.example.adminlivria.profilecontext.data.remote.AuthService
 import com.example.adminlivria.profilecontext.data.remote.UserAdminService
+import com.example.adminlivria.stockcontext.data.remote.InventoryService
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
-
+const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
 private lateinit var tokenManager: TokenManager
 
 fun initializeTokenManager(context: Context) {
@@ -18,6 +19,9 @@ fun initializeTokenManager(context: Context) {
 
 
 private fun createOkHttpClient(): OkHttpClient {
+    val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
 
     val authInterceptor = okhttp3.Interceptor { chain ->
         val originalRequest = chain.request()
@@ -36,9 +40,11 @@ private fun createOkHttpClient(): OkHttpClient {
     }
 
     return OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
         .addInterceptor(authInterceptor)
         .build()
 }
+
 
 
 private val retrofit: Retrofit by lazy {
@@ -51,6 +57,11 @@ private val retrofit: Retrofit by lazy {
 
 val authServiceInstance: AuthService by lazy {
     retrofit.create(AuthService::class.java)
+}
+
+
+val inventoryServiceInstance: InventoryService by lazy {
+    retrofit.create(InventoryService::class.java)
 }
 
 val userAdminServiceInstance: UserAdminService by lazy {
