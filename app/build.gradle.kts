@@ -40,6 +40,10 @@ android {
     }
 }
 
+configurations.all {
+    exclude(group = "com.google.auto.value", module = "auto-value")
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -52,7 +56,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.foundation.layout)
-    implementation(libs.androidx.room.compiler.processing.testing)
+    //implementation(libs.androidx.room.compiler.processing.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

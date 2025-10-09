@@ -93,6 +93,44 @@ class OrderRepository(
         }
     }
 
+    // SEARCH
+    suspend fun searchOrders(query: String): Resource<List<Order>> = withContext(Dispatchers.IO) {
+        val lowerCaseQuery = query.lowercase().trim()
+
+        try {
+            // 1. Llama al endpoint que trae TODAS las órdenes
+            val response = service.getAllOrders()
+
+            if (response.isSuccessful) {
+                response.body()?.let { listDto ->
+
+                    // 2. Mapeo DTO -> Dominio y Filtrado Local
+                    val filteredOrders = listDto
+                        .map { it.toDomain() } // Convertir todos a entidades de Dominio
+                        .filter { order ->
+                            // El filtro buscará la coincidencia en el ID (si es número) o en el nombre
+                            order.userFullName.lowercase().contains(lowerCaseQuery) ||
+                                    order.code.lowercase() == lowerCaseQuery
+                            // No filtramos por ID aquí, ya que el ViewModel lo maneja primero
+                        }
+
+                    if (filteredOrders.isNotEmpty()) {
+                        return@withContext Resource.Success(data = filteredOrders)
+                    }
+
+                    return@withContext Resource.Error(
+                        message = "No se encontraron órdenes para '$query'"
+                    )
+                }
+                return@withContext Resource.Error(message = "El servidor devolvió una lista vacía.")
+            }
+            return@withContext Resource.Error(message = "Error de API al buscar órdenes: ${response.message()}")
+
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Error de red al buscar órdenes")
+        }
+    }
+
 
     // Función para guardar una Order completa en Room
     suspend fun saveOrderLocally(order: Order) = withContext(Dispatchers.IO) {

@@ -2,6 +2,9 @@ package com.example.adminlivria.common
 
 import com.example.adminlivria.profilecontext.data.remote.AuthService
 import android.content.Context
+import com.example.adminlivria.orderscontext.data.local.OrderDao
+import com.example.adminlivria.orderscontext.data.remote.OrderService
+import com.example.adminlivria.orderscontext.data.repository.OrderRepository
 import com.example.adminlivria.profilecontext.data.local.TokenManager
 import com.example.adminlivria.profilecontext.data.remote.UserAdminService
 import okhttp3.OkHttpClient
@@ -55,4 +58,17 @@ val authServiceInstance: AuthService by lazy {
 
 val userAdminServiceInstance: UserAdminService by lazy {
     retrofit.create(UserAdminService::class.java)
+}
+
+val orderServiceInstance: OrderService by lazy {
+    retrofit.create(OrderService::class.java)
+}
+
+lateinit var orderDaoInstance: OrderDao
+
+val orderRepositoryInstance: OrderRepository by lazy {
+    OrderRepository(
+        service = orderServiceInstance,
+        dao = orderDaoInstance
+    )
 }

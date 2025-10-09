@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +51,10 @@ fun OrdersScreen(
     navController: NavController,
     viewModel: OrdersViewModel = viewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.loadAllOrders()
+    }
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier.fillMaxWidth().padding(paddingValues)
@@ -242,9 +247,10 @@ fun SearchNFilterCard(
                 Box(){
                     IconButton(
                         onClick = {
+                            viewModel.onSearchClicked()
                         },
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(48.dp)
                             .background(Color.Transparent)
                     ) {
                         Icon(
