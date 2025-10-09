@@ -1,5 +1,6 @@
 package com.example.adminlivria.common.navigation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -52,6 +53,8 @@ fun AdminNavGraph(
     val context = LocalContext.current
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
+    Log.d("AdminNavGraph", "token=${tokenManager.getToken()} adminId=${tokenManager.getAdminId()}")
+
 
     // --- 1. DEFINICIÓN DE FACTORÍAS ---
     val loginViewModelFactory = LoginViewModelFactory(
@@ -72,11 +75,9 @@ fun AdminNavGraph(
 
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val settingsViewModel: SettingsViewModel = viewModel(
-        viewModelStoreOwner = viewModelStoreOwner,
         factory = settingsViewModelFactory
     )
 
-    val settingsState by settingsViewModel.uiState.collectAsState()
 
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -84,18 +85,21 @@ fun AdminNavGraph(
 
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    val currentCapitalForTopBar = settingsState.capital
-
-
     val booksViewModel: BooksManagementViewModel = viewModel(
         factory = BooksViewModelFactory(context)
     )
 
 
+
     Scaffold(
         topBar = {
             if (showBars) {
-                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentCapitalValue = currentCapitalForTopBar )
+                LivriaTopBar(
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
             }
         },
         bottomBar = {
@@ -104,41 +108,29 @@ fun AdminNavGraph(
             }
         }
     ) { paddingValues ->
-
         NavHost(
             navController = navController,
             startDestination = if (tokenManager.getToken() != null)
-                NavDestinations.HOME_ROUTE else NavDestinations.LOGIN_ROUTE,
+                NavDestinations.HOME_ROUTE
+            else
+                NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
+            // --- LOGIN ---
             composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
-                val scope = rememberCoroutineScope()
-
                 LoginScreen(
                     viewModel = loginViewModel,
                     onLoginSuccess = {
-
-                        scope.launch {
-                            // 1. Ejecutamos AMBAS tareas de red en paralelo para más eficiencia
-                            val settingsJob = launch { settingsViewModel.loadAdminData() }
-                            val booksJob = launch { booksViewModel.refresh() }
-
-                            // 2. Esperamos a que AMBAS terminen
-                            settingsJob.join()
-                            booksJob.join()
-
-                            // 3. SOLO CUANDO HAN TERMINADO, navegamos
-                            navController.navigate(NavDestinations.HOME_ROUTE) {
-                                popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
-                            }
+                        navController.navigate(NavDestinations.HOME_ROUTE) {
+                            popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
                         }
                     }
                 )
             }
 
-            // 1. HOME (Rutas que requieren autenticación)
+            // --- HOME ---
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(
                     navController = navController,
@@ -147,11 +139,17 @@ fun AdminNavGraph(
                 )
             }
 
-            // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
+            // --- SETTINGS ---
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
+                val settingsViewModelFactory = SettingsViewModelFactory(
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
+                val settingsViewModel: SettingsViewModel = viewModel(factory = settingsViewModelFactory)
+
                 SettingsScreen(
-                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
-                    onLogout = { // <-- Se pasa el callback onLogout
+                    viewModel = settingsViewModel,
+                    onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -160,34 +158,18 @@ fun AdminNavGraph(
                 )
             }
 
-            // 3. RUTAS DE LA BARRA INFERIOR
+            // --- BOOKS ---
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
-                    navController = navController,     // 👈 necesario para navegar al detalle
+                    navController = navController,
                     viewModel = booksViewModel
                 )
             }
-            composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
-                OrdersScreen(navController = navController)
-            }
-            composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                AddBookScreen()
-            }
-            composable(route = NavDestinations.STATISTICS_ROUTE) {
-                val context = LocalContext.current
 
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "STATS!", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            // 4. RUTAS DETALLE
-            composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
-                val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
-                BookDetailScreen(bookId = id)
-            }
-            composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
-            composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
+            // --- OTRAS ---
+            composable(NavDestinations.ORDERS_MANAGEMENT_ROUTE) { OrdersScreen(navController = navController) }
+            composable(NavDestinations.INVENTORY_ADD_BOOK_ROUTE) { AddBookScreen() }
+            composable(NavDestinations.STATISTICS_ROUTE) { /* placeholder */ }
         }
     }
 }
