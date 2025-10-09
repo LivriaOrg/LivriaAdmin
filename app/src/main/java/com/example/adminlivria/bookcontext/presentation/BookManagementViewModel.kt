@@ -61,7 +61,7 @@ class BooksManagementViewModel(
             val genres = list.map { it.genre }.distinct().size
             val priced = list.map { it.price }.filter { it > 0.0 }
             val avg = if (priced.isNotEmpty()) priced.average() else 0.0
-            val inStock = list.count { it.stock > 0 }
+            val inStock = list.sumOf { it.stock }
             BooksStats(totalBooks = total, totalGenres = genres, averagePrice = avg, booksInStock = inStock)
         }.stateIn(viewModelScope, SharingStarted.Lazily, BooksStats())
 

@@ -108,7 +108,8 @@ fun BooksScreen(
                 items(books, key = { it.id }) { book ->
                     BookGridTile(
                         book = book,
-                        onView = { navController.navigate("${NavDestinations.BOOK_DETAIL_ROUTE}/${book.id}") }
+                        onView = { navController.navigate("${NavDestinations.BOOK_DETAIL_ROUTE}/${book.id}") },
+                        onStock = { navController.navigate("${NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE}/${book.id}") }
                     )
                 }
             }

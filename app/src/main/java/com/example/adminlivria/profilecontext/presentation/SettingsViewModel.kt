@@ -51,7 +51,12 @@ class SettingsViewModel(
             loadAdminData()
         }
     }
+    fun spend(amount: Double) {
+        if (amount <= 0) return
+        val current = _uiState.value.capital
+        _uiState.value = _uiState.value.copy(capital = (current - amount).coerceAtLeast(0.0))
 
+    }
 
     fun updateField(field: String, value: String) {
         _uiState.update { currentState ->
