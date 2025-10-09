@@ -52,7 +52,7 @@ fun AdminNavGraph(
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
 
-    // --- 1. DEFINICIÓN DE FACTORÍAS ---
+
     val loginViewModelFactory = LoginViewModelFactory(
         authService = authServiceInstance,
         tokenManager = tokenManager
@@ -112,15 +112,15 @@ fun AdminNavGraph(
                     onLoginSuccess = {
 
                         scope.launch {
-                            // 1. Ejecutamos AMBAS tareas de red en paralelo para más eficiencia
+
                             val settingsJob = launch { settingsViewModel.loadAdminData() }
                             val booksJob = launch { booksViewModel.refresh() }
 
-                            // 2. Esperamos a que AMBAS terminen
+
                             settingsJob.join()
                             booksJob.join()
 
-                            // 3. SOLO CUANDO HAN TERMINADO, navegamos
+
                             navController.navigate(NavDestinations.HOME_ROUTE) {
                                 popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
                             }
@@ -128,16 +128,16 @@ fun AdminNavGraph(
                     }
                 )
             }
-            // 1. HOME (Rutas que requieren autenticación)
+
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(navController = navController)
             }
 
-            // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
+
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 SettingsScreen(
-                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
-                    onLogout = { // <-- Se pasa el callback onLogout
+                    viewModel = settingsViewModel,
+                    onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -146,10 +146,10 @@ fun AdminNavGraph(
                 )
             }
 
-            // 3. RUTAS DE LA BARRA INFERIOR
+
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
-                    navController = navController,     // 👈 necesario para navegar al detalle
+                    navController = navController,
                     viewModel = booksViewModel
                 )
             }
@@ -167,7 +167,7 @@ fun AdminNavGraph(
                 }
             }
 
-            // 4. RUTAS DETALLE
+
             composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
                 val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
                 BookDetailScreen(bookId = id)
@@ -176,6 +176,6 @@ fun AdminNavGraph(
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
         }
     }
-    // ELIMINACIÓN DE CODIGO DUPLICADO (ESTO CAUSABA PROBLEMAS)
-    // composable(route = NavDestinations.LOGIN_ROUTE) { ... }
+
+
 }
