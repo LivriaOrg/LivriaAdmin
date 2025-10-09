@@ -2,13 +2,16 @@ package com.example.adminlivria.orderscontext.presentation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,7 +59,7 @@ fun OrdersScreen(
     val search = viewModel.search.value
 
     LaunchedEffect(Unit) {
-        //viewModel.loadAllOrders()
+        viewModel.loadAllOrders()
     }
 
     Scaffold { paddingValues ->
@@ -128,7 +131,7 @@ fun MiniStats(
     OutlinedCard(
         modifier = Modifier
             .padding(6.dp)
-            .height(80.dp)
+            .height(75.dp)
             .width(110.dp),
         colors = CardDefaults.cardColors(containerColor = LivriaWhite),
         border = BorderStroke(1.dp, LivriaLightGray)
@@ -183,7 +186,7 @@ fun SearchNFilterCard(
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 18.dp)
+                    .padding(top = 18.dp)
             ) {
                 Spacer(Modifier.weight(1f))
                 Text(
@@ -216,12 +219,16 @@ fun SearchNFilterCard(
                 }
             }
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .padding(bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = search,
                     onValueChange = { viewModel.onSearchEntered(it) },
-                    label = {
+                    placeholder = {
                         Text(
                             text = "Enter an Order Code or Customer Name",
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -238,7 +245,7 @@ fun SearchNFilterCard(
                         unfocusedContainerColor = LivriaWhite,
                         disabledContainerColor = LivriaWhite,
                         focusedTextColor = LivriaBlack,
-                        unfocusedTextColor = LivriaBlack,
+                        unfocusedTextColor = LivriaBlue,
                         focusedIndicatorColor = LivriaBlue,
                         unfocusedIndicatorColor = LivriaLightGray,
                         focusedLabelColor = LivriaBlue,
@@ -246,31 +253,37 @@ fun SearchNFilterCard(
                         cursorColor = LivriaBlue
                     ),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp, vertical = 15.dp)
-                        .weight(4f)
+                        .weight(1f)
+                        .heightIn(min = 56.dp)
                 )
-                Box(
-                    Modifier.weight(1f)
-                ){
-                    IconButton(
-                        onClick = {
-                            viewModel.onSearchClicked()
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.Transparent)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "Search",
-                            tint = LivriaBlue,
-                            modifier = Modifier.height(24.dp)
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = { viewModel.onSearchClicked() },
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(Color.Transparent)
+                        .border(
+                            width = 1.dp,
+                            color = LivriaLightGray,
+                            shape = MaterialTheme.shapes.small
                         )
-                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search),
+                        contentDescription = "Search",
+                        tint = LivriaBlue,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
 
         }
     }
+}
+
+@Composable
+fun OrdersTable(){
+
 }
