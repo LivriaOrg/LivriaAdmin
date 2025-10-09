@@ -1,62 +1,66 @@
-package com.example.adminlivria.profilecontext.presentation
+package com.example.adminlivria.presentation.settings
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.adminlivria.profilecontext.domain.AdminUser
+import com.example.adminlivria.data.local.TokenManager
+import com.example.adminlivria.data.remote.UserAdminService
+import com.example.adminlivria.data.model.UserAdminDto
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
+
 
 data class SettingsUiState(
-    val user: AdminUser = AdminUser.mock(),
+    val display: String = "",
+    val username: String = "",
+    val email: String = "",
+    val securityPin: String = "",
+    val capital: Double = 0.0,
     val isLoading: Boolean = false,
+    val initialLoadError: String? = null,
     val isSaving: Boolean = false,
     val saveSuccess: Boolean = false,
+    val saveError: String? = null,
+
     val isProfileTabSelected: Boolean = true,
-    val securityPin: String = "",
     val receiveNotifications: Boolean = true,
     val receiveEmailAlerts: Boolean = true,
     val autoSaveEnabled: Boolean = false,
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(
+    private val userAdminService: UserAdminService,
+    private val tokenManager: TokenManager
+) : ViewModel() {
 
     var uiState by mutableStateOf(SettingsUiState())
         private set
 
+    private val adminId: Int = tokenManager.getAdminId()
+
+    init {
+        loadAdminData()
+    }
+
+
     fun updateField(field: String, value: String) {
-        val updatedUser = when (field) {
-            "fullName" -> uiState.user.copy(fullName = value)
-            "username" -> uiState.user.copy(username = value)
-            "email" -> uiState.user.copy(email = value)
-            else -> uiState.user
+        val updatedState = when (field) {
+            "fullName" -> uiState.copy(display = value)
+            "username" -> uiState.copy(username = value)
+            "email" -> uiState.copy(email = value)
+            "securityPin" -> uiState.copy(securityPin = value)
+            else -> uiState
         }
-        val newPin = if (field == "securityPin") value else uiState.securityPin
-        uiState = uiState.copy(user = updatedUser, securityPin = newPin, saveSuccess = false)
+        uiState = updatedState.copy(saveSuccess = false, saveError = null)
     }
 
     fun setTab(isProfile: Boolean) {
         uiState = uiState.copy(isProfileTabSelected = isProfile)
     }
-
-    fun saveChanges() {
-        uiState = uiState.copy(isSaving = true)
-
-        viewModelScope.launch {
-            // Simulación de la llamada al repositorio
-            delay(500) // Simula la latencia de la red de 0.5 segundos
-
-            // 1. Finaliza el guardado y establece el éxito
-            uiState = uiState.copy(isSaving = false, saveSuccess = true)
-
-            // 2. TEMPORIZADOR: Después de 3 segundos, oculta el mensaje
-            delay(3000) // Espera 3 segundos
-            uiState = uiState.copy(saveSuccess = false)
-        }
-    }
-
 
     fun updateApplicationSetting(setting: String, isEnabled: Boolean) {
         uiState = when (setting) {
@@ -68,6 +72,96 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun logout() {
-        println("Cierre de sesión simulado")
+        tokenManager.clearAuthData()
+        println("Cierre de sesión completado.")
+    }
+
+
+    fun loadAdminData() {
+        if (adminId == 0) {
+            uiState = uiState.copy(initialLoadError = "Error: Sesión no válida. Por favor, vuelva a iniciar sesión.", isLoading = false)
+            return
+        }
+
+        uiState = uiState.copy(isLoading = true, initialLoadError = null)
+
+        viewModelScope.launch {
+            try {
+                val response = userAdminService.getUserAdminData()
+
+                if (response.isSuccessful) {
+                    val adminList = response.body()
+                    val adminDto = adminList?.firstOrNull()
+                    adminDto?.let {
+                        uiState = uiState.copy(
+                            display = it.display,
+                            username = it.username,
+                            email = it.email,
+                            securityPin = it.securityPin,
+                            capital = adminDto.capital,
+                            isLoading = false
+                        )
+                    }
+                } else {
+                    uiState = uiState.copy(
+                        initialLoadError = "No se pudieron cargar los datos. (Error ${response.code()})",
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                val errorMsg = when (e) {
+                    is HttpException -> "Error de servidor al cargar: ${e.message()}"
+                    is IOException -> "Error de conexión al cargar. Verifique su red."
+                    else -> "Ocurrió un error inesperado al cargar los datos."
+                }
+                uiState = uiState.copy(initialLoadError = errorMsg, isLoading = false)
+            }
+        }
+    }
+
+
+    fun saveChanges() {
+        if (adminId == 0 || uiState.display.isBlank() || uiState.username.isBlank() || uiState.email.isBlank() || uiState.securityPin.isBlank()) {
+            uiState = uiState.copy(saveError = "Datos incompletos o sesión inválida.")
+            return
+        }
+
+        uiState = uiState.copy(isSaving = true, saveSuccess = false, saveError = null)
+
+        viewModelScope.launch {
+            try {
+                val requestDto = UserAdminDto(
+                    id = adminId,
+                    display = uiState.display,
+                    username = uiState.username,
+                    email = uiState.email,
+                    adminAccess = true,
+                    securityPin = uiState.securityPin,
+                    capital = uiState.capital
+                )
+
+                val response = userAdminService.updateUserAdmin(adminId, requestDto)
+
+                if (response.isSuccessful) {
+                    uiState = uiState.copy(isSaving = false, saveSuccess = true, saveError = null)
+                } else {
+                    val errorMsg = response.errorBody()?.string() ?: "Error desconocido al guardar."
+                    uiState = uiState.copy(isSaving = false, saveSuccess = false, saveError = "Error ${response.code()}: $errorMsg")
+                }
+
+                if (uiState.saveSuccess) {
+                    delay(3000)
+                    uiState = uiState.copy(saveSuccess = false)
+                }
+
+            } catch (e: Exception) {
+                val errorMsg = when (e) {
+                    is HttpException -> "Error de servidor al guardar: ${e.message()}"
+                    is IOException -> "Error de conexión al guardar. Verifique su red."
+                    else -> "Ocurrió un error inesperado al guardar los datos."
+                }
+                uiState = uiState.copy(isSaving = false, saveSuccess = false, saveError = errorMsg)
+            }
+        }
     }
 }

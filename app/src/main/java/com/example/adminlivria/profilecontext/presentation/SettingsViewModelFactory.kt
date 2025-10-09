@@ -1,20 +1,21 @@
-package com.example.adminlivria.presentation.login
+package com.example.adminlivria.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.adminlivria.data.local.TokenManager
-import com.example.adminlivria.profilecontext.data.remote.AuthService
+import com.example.adminlivria.data.remote.UserAdminService
 import java.lang.IllegalArgumentException
 
-class LoginViewModelFactory(
-    private val authService: AuthService,
+
+class SettingsViewModelFactory(
+    private val userAdminService: UserAdminService,
     private val tokenManager: TokenManager
 ) : ViewModelProvider.Factory {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return LoginViewModel(authService, tokenManager) as T
+        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+            return SettingsViewModel(userAdminService, tokenManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

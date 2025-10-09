@@ -1,10 +1,11 @@
-package com.example.adminlivria.profilecontext.presentation
+package com.example.adminlivria.presentation.login
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.adminlivria.data.local.TokenManager
 import com.example.adminlivria.profilecontext.data.model.LoginAdminRequest
 import com.example.adminlivria.profilecontext.data.remote.AuthService
 import kotlinx.coroutines.launch
@@ -21,7 +22,8 @@ data class LoginUiState(
 )
 
 class LoginViewModel(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     var uiState by mutableStateOf(LoginUiState())
@@ -61,6 +63,10 @@ class LoginViewModel(
                     val authResponse = response.body()
 
                     if (authResponse?.success == true && authResponse.token != null) {
+
+                        val adminId = authResponse.id ?: 0
+                        tokenManager.saveAuthData(authResponse.token, adminId)
+
                         uiState = uiState.copy(
                             isAuthenticated = true,
                             isLoading = false

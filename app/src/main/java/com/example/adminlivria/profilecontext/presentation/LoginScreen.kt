@@ -29,16 +29,14 @@ import com.example.adminlivria.common.ui.theme.LivriaYellowLight
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
-    authService: AuthService = authServiceInstance
 ) {
-    val factory = remember { LoginViewModelFactory(authService) }
 
-    val viewModel: LoginViewModel = viewModel(factory = factory)
 
     val uiState = viewModel.uiState
 
-    LaunchedEffect(key1 = uiState.isAuthenticated) {
+    LaunchedEffect(uiState.isAuthenticated) {
         if (uiState.isAuthenticated) {
             onLoginSuccess()
         }
