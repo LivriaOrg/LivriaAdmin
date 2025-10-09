@@ -82,6 +82,7 @@ val userAdminServiceInstance: UserAdminService by lazy {
 val bookServiceInstance: BookService by lazy {
     retrofit.create(BookService::class.java)
 }
+
 val orderServiceInstance: OrderService by lazy {
     retrofit.create(OrderService::class.java)
 }

@@ -23,6 +23,8 @@ interface BookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(entities: List<BookEntity>)
 
+    @Query("UPDATE books SET stock = stock + :delta WHERE id = :id")
+    suspend fun addStock(id: Int, delta: Int)
     @Query("SELECT COUNT(*) FROM books")
     suspend fun count(): Int
 

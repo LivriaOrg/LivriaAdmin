@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,13 +44,27 @@ import com.example.adminlivria.common.ui.theme.LivriaOrange
 import com.example.adminlivria.common.ui.theme.LivriaSoftCyan
 import com.example.adminlivria.common.ui.theme.LivriaWhite
 import com.example.adminlivria.common.ui.theme.LivriaYellowLight
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.adminlivria.profilecontext.data.local.TokenManager
+import com.example.adminlivria.profilecontext.data.remote.UserAdminService
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    viewModel: HomeViewModel = viewModel()
+    userAdminService: UserAdminService,
+    tokenManager: TokenManager
 ) {
-    val state = viewModel.uiState
+
+    val factory = remember {
+        HomeViewModelFactory(userAdminService, tokenManager)
+    }
+
+    val viewModel: HomeViewModel = viewModel(factory = factory)
+
+    val state by viewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize())
@@ -100,92 +115,24 @@ fun HomeScreen(
                         color = LivriaSoftCyan
                     )
 
-                    WelcomeCard(state.user.username, state.user.fullName)
-                }
-
-                // --- 2. SECCIÓN DE QUICK ACTIONS ---
-                Column {
-                    Text(
-                        "Quick Actions",
-                        textAlign = TextAlign.Center,
-                        color = LivriaNavyBlue,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(horizontal = 18.dp, vertical = 6.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 18.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        QuickActionButton(
-                            modifier = Modifier.weight(1f),
-                            icon = painterResource(id = R.drawable.ic_book),
-                            label = "Manage Books",
-                            onClick = { navController.navigate(NavDestinations.BOOKS_MANAGEMENT_ROUTE) }
-                        )
-                        QuickActionButton(
-                            modifier = Modifier.weight(1f),
-                            icon = painterResource(id = R.drawable.ic_cart),
-                            label = "Manage Orders",
-                            onClick = { navController.navigate(NavDestinations.ORDERS_MANAGEMENT_ROUTE) }
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 18.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        QuickActionButton(
-                            modifier = Modifier.weight(1f),
-                            icon = painterResource(id = R.drawable.ic_clipboard),
-                            label = "Inventory",
-                            onClick = { navController.navigate(NavDestinations.INVENTORY_ADD_BOOK_ROUTE) }
-                        )
-                        QuickActionButton(
-                            modifier = Modifier.weight(1f),
-                            icon = painterResource(id = R.drawable.ic_stats),
-                            label = "Statistics",
-                            onClick = { navController.navigate(NavDestinations.STATISTICS_ROUTE) }
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 18.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        QuickActionButton(
-                            modifier = Modifier.weight(1f),
-                            icon = painterResource(id = R.drawable.ic_settings),
-                            label = "Settings",
-                            onClick = { navController.navigate(NavDestinations.SETTINGS_PROFILE_ROUTE) }
-                        )
-                    }
-                }
-
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 3. SYSTEM INFORMATION SECTION
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = LivriaYellowLight.copy(alpha = 0.35f),
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp)
-                ) {
-                    Column(modifier = Modifier.padding(3.dp)) {
+                    if (state.isLoading) {
+                        LoadingSection()
+                    } else if (state.loadError != null) {
                         Text(
-                            "System Information",
+                            "Error al cargar datos: ${state.loadError}",
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                        )
+                    } else {
+                        WelcomeCard(state.user.username, state.user.fullName)
+                    }
+                }
+                if (!state.isLoading && state.loadError == null) {
+                    // --- 2. SECCIÓN DE QUICK ACTIONS ---
+                    Column {
+                        Text(
+                            "Quick Actions",
                             textAlign = TextAlign.Center,
                             color = LivriaNavyBlue,
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -193,39 +140,119 @@ fun HomeScreen(
                                 fontSize = 16.sp
                             ),
                             modifier = Modifier.fillMaxWidth()
-                                .padding(top= 18.dp)
+                                .padding(horizontal = 18.dp, vertical = 6.dp)
                         )
-                        Text(
-                            "Application Version: 1.0.0",
-                            textAlign = TextAlign.Center,
-                            color = LivriaBlack,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontFamily = AlexandriaFontFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 11.sp
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(3.dp)
-                                .padding(top = 10.dp)
-                        )
-                        Text(
-                            "Server Status: Online",
-                            textAlign = TextAlign.Center,
-                            color = LivriaBlack,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontFamily = AlexandriaFontFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 11.sp
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(3.dp)
-                                .padding(bottom = 18.dp)
-                        )
-                    }
-                }
 
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 18.dp),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            QuickActionButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(id = R.drawable.ic_book),
+                                label = "Manage Books",
+                                onClick = { navController.navigate(NavDestinations.BOOKS_MANAGEMENT_ROUTE) }
+                            )
+                            QuickActionButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(id = R.drawable.ic_cart),
+                                label = "Manage Orders",
+                                onClick = { navController.navigate(NavDestinations.ORDERS_MANAGEMENT_ROUTE) }
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 18.dp),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            QuickActionButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(id = R.drawable.ic_clipboard),
+                                label = "Inventory",
+                                onClick = { navController.navigate(NavDestinations.INVENTORY_ADD_BOOK_ROUTE) }
+                            )
+                            QuickActionButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(id = R.drawable.ic_stats),
+                                label = "Statistics",
+                                onClick = { navController.navigate(NavDestinations.STATISTICS_ROUTE) }
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 18.dp),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            QuickActionButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(id = R.drawable.ic_settings),
+                                label = "Settings",
+                                onClick = { navController.navigate(NavDestinations.SETTINGS_PROFILE_ROUTE) }
+                            )
+                        }
+                    }
+
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // 3. SYSTEM INFORMATION SECTION
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = LivriaYellowLight.copy(alpha = 0.35f),
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 24.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(3.dp)) {
+                            Text(
+                                "System Information",
+                                textAlign = TextAlign.Center,
+                                color = LivriaNavyBlue,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(top = 18.dp)
+                            )
+                            Text(
+                                "Application Version: 1.0.0",
+                                textAlign = TextAlign.Center,
+                                color = LivriaBlack,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = AlexandriaFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 11.sp
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(3.dp)
+                                    .padding(top = 10.dp)
+                            )
+                            Text(
+                                "Server Status: Online",
+                                textAlign = TextAlign.Center,
+                                color = LivriaBlack,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = AlexandriaFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 11.sp
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(3.dp)
+                                    .padding(bottom = 18.dp)
+                            )
+                        }
+                    }
+
+                }
             }
 
 
@@ -275,5 +302,28 @@ fun QuickActionButton(
                 )
             )
         }
+    }
+}
+
+@Composable
+fun LoadingSection() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp) // Altura similar al WelcomeCard
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(32.dp),
+            color = LivriaOrange
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = "Loading admin data...",
+            color = LivriaNavyBlue,
+            fontFamily = AlexandriaFontFamily
+        )
     }
 }

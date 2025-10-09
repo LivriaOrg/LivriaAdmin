@@ -13,8 +13,8 @@ data class AdminUser(
     companion object {
         fun mock() = AdminUser(
             id = "ADMIN_001",
-            username = "admin_livria",
-            fullName = "Alex Tomio Nakamurakare",
+            username = "AAAAAAAAAAA",
+            fullName = "admin",
             email = "admin@livria.com",
             capital = 4556.37,
             adminAccess = 0

@@ -2,16 +2,22 @@ package com.example.adminlivria.orderscontext.presentation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,21 +43,29 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.adminlivria.R
+import com.example.adminlivria.common.navigation.NavDestinations
 import com.example.adminlivria.common.ui.theme.AlexandriaFontFamily
 import com.example.adminlivria.common.ui.theme.AsapCondensedFontFamily
 import com.example.adminlivria.common.ui.theme.LivriaAmber
 import com.example.adminlivria.common.ui.theme.LivriaBlack
 import com.example.adminlivria.common.ui.theme.LivriaBlue
 import com.example.adminlivria.common.ui.theme.LivriaLightGray
+import com.example.adminlivria.common.ui.theme.LivriaNavyBlue
 import com.example.adminlivria.common.ui.theme.LivriaOrange
 import com.example.adminlivria.common.ui.theme.LivriaSoftCyan
 import com.example.adminlivria.common.ui.theme.LivriaWhite
+import com.example.adminlivria.orderscontext.domain.Order
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun OrdersScreen(
     navController: NavController,
-    viewModel: OrdersViewModel = viewModel()
+    viewModel: OrdersViewModel = viewModel(factory = OrdersViewModelFactory(LocalContext.current))
 ) {
+    val state = viewModel.state.value
+    val search = viewModel.search.value
+
     LaunchedEffect(Unit) {
         viewModel.loadAllOrders()
     }
@@ -109,7 +124,97 @@ fun OrdersScreen(
                 )
             }
 
-            SearchNFilterCard(viewModel, viewModel.search)
+            SearchNFilterCard(viewModel, search)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Encabezados
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("CODE",
+                        color = LivriaNavyBlue,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text("NAME",
+                        color = LivriaNavyBlue,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text("DATE",
+                        color = LivriaNavyBlue,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text("TOTAL",
+                        color = LivriaNavyBlue,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text("STATUS",
+                        color = LivriaNavyBlue,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 18.dp),
+                    thickness = 2.dp,
+                    color = LivriaSoftCyan
+                )
+                state.data?.let { orders ->
+                    // Filas con LazyColumn para scroll
+                    LazyColumn {
+                        items(orders) { order ->
+                            OrderRow(
+                                order = order,
+                                onClick = {
+                                    navController.navigate("${NavDestinations.ORDER_DETAIL_ROUTE}/${order.id}")
+                                }
+                            )
+                        }
+                    }
+                }
+                if (state.isLoading) {
+                    Text(
+                        text = "Loading orders...",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                if (state.message.isNotEmpty()) {
+                    Text(
+                        text = state.message,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color.Red
+                    )
+                }
+            }
 
         }
     }
@@ -124,7 +229,7 @@ fun MiniStats(
     OutlinedCard(
         modifier = Modifier
             .padding(6.dp)
-            .height(80.dp)
+            .height(75.dp)
             .width(110.dp),
         colors = CardDefaults.cardColors(containerColor = LivriaWhite),
         border = BorderStroke(1.dp, LivriaLightGray)
@@ -179,7 +284,7 @@ fun SearchNFilterCard(
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 18.dp)
+                    .padding(top = 18.dp)
             ) {
                 Spacer(Modifier.weight(1f))
                 Text(
@@ -196,6 +301,7 @@ fun SearchNFilterCard(
                 )
                 IconButton(
                     onClick = {
+                        viewModel.onSearchClicked()
                     },
                     modifier = Modifier
                         .size(24.dp)
@@ -211,17 +317,21 @@ fun SearchNFilterCard(
                 }
             }
             Row(
-
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .padding(bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = search,
-                    onValueChange = { viewModel.onSearch(it) },
-                    label = {
+                    onValueChange = { viewModel.onSearchEntered(it) },
+                    placeholder = {
                         Text(
-                            text = "Enter an Order ID or Customer Name",
+                            text = "Enter an Order Code or Customer Name",
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp
+                                fontSize = 12.sp
                             )
                         )
                     },
@@ -233,7 +343,7 @@ fun SearchNFilterCard(
                         unfocusedContainerColor = LivriaWhite,
                         disabledContainerColor = LivriaWhite,
                         focusedTextColor = LivriaBlack,
-                        unfocusedTextColor = LivriaBlack,
+                        unfocusedTextColor = LivriaBlue,
                         focusedIndicatorColor = LivriaBlue,
                         unfocusedIndicatorColor = LivriaLightGray,
                         focusedLabelColor = LivriaBlue,
@@ -241,28 +351,84 @@ fun SearchNFilterCard(
                         cursorColor = LivriaBlue
                     ),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp, vertical = 15.dp)
+                        .weight(1f)
+                        .heightIn(min = 56.dp)
                 )
-                Box(){
-                    IconButton(
-                        onClick = {
-                            viewModel.onSearchClicked()
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.Transparent)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "Search",
-                            tint = LivriaBlue,
-                            modifier = Modifier.height(24.dp)
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = { viewModel.onSearchClicked() },
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(Color.Transparent)
+                        .border(
+                            width = 1.dp,
+                            color = LivriaLightGray,
+                            shape = MaterialTheme.shapes.small
                         )
-                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search),
+                        contentDescription = "Search",
+                        tint = LivriaBlue,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
 
         }
+    }
+}
+
+@Composable
+fun OrderRow(
+    order: Order,
+    onClick: () -> Unit
+) {
+    val formattedDate = order.date
+        .atZone(ZoneId.systemDefault())
+        .format(DateTimeFormatter.ofPattern("dd/MM/yy"))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp, horizontal = 18.dp)
+            .border(1.dp, LivriaLightGray, shape = MaterialTheme.shapes.small)
+            .clickable { onClick() },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "#" + order.code,
+            color = LivriaOrange,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = order.userFullName,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f))
+        Text(
+            text = formattedDate,
+            textAlign = TextAlign.Center,
+            fontSize = 12.sp,
+            modifier = Modifier.weight(1f))
+        Text(
+            text = "S/ ${order.total}",
+            textAlign = TextAlign.Center,
+            fontSize = 12.sp,
+            modifier = Modifier.weight(1f))
+        Text(
+            text = order.status.uppercase(),
+            color = if (order.status == "pending") LivriaOrange else LivriaBlue,
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
     }
 }

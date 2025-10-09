@@ -4,6 +4,7 @@ import com.example.adminlivria.bookcontext.data.local.BookDao
 import com.example.adminlivria.bookcontext.data.local.toDomain
 import com.example.adminlivria.bookcontext.data.local.toEntity
 import com.example.adminlivria.bookcontext.data.remote.BookService
+import com.example.adminlivria.bookcontext.data.remote.StockUpdateRequest
 import com.example.adminlivria.bookcontext.data.remote.toDomain
 import com.example.adminlivria.bookcontext.domain.Book
 import kotlinx.coroutines.flow.*
@@ -47,6 +48,18 @@ class BooksRepository(
     }
     fun getBookById(id: Int): Flow<Book?> =
         dao.getById(id).map { it?.toDomain() }
+    suspend fun addStock(id: Int, qty: Int): Book {
+        val res = service.addStock(id, StockUpdateRequest(quantityToAdd = qty))
+        if (!res.isSuccessful) {
+            throw IllegalStateException("addStock failed: ${res.code()} ${res.message()}")
+        }
+        val updated = res.body() ?: error("Empty body")
+        val entity = updated.toDomain().toEntity()
+        dao.upsertAll(listOf(entity))
+        return entity.toDomain()
+    }
+
+
     suspend fun isEmpty(): Boolean = dao.count() == 0
 
     override suspend fun getTopBooksByStock(limit: Int): List<Book> {

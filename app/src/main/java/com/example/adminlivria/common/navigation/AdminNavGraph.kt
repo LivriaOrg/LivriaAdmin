@@ -1,5 +1,6 @@
 package com.example.adminlivria.common.navigation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -35,12 +36,19 @@ import com.example.adminlivria.profilecontext.presentation.SettingsViewModel // 
 import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory// Asumo el paquete
 import androidx.compose.runtime.remember // Necesario para memoizar el ViewModel
 import androidx.compose.runtime.collectAsState // Necesario para el capital si el ViewModel lo usa
+import androidx.compose.runtime.rememberCoroutineScope
 
 
 import com.example.adminlivria.bookcontext.presentation.BooksScreen
 import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
 import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
 import com.example.adminlivria.bookcontext.presentation.detail.BookDetailScreen
+import com.example.adminlivria.bookcontext.presentation.stock.StockScreen
+import kotlinx.coroutines.launch
+import com.example.adminlivria.orderscontext.presentation.OrdersViewModel
+import com.example.adminlivria.orderscontext.presentation.OrdersViewModelFactory
+import com.example.adminlivria.orderscontext.presentation.orderdetail.OrderDetailScreen
+import com.example.adminlivria.searchcontext.presentation.HomeViewModelFactory
 import com.example.adminlivria.statscontext.presentation.StatsScreen
 import com.example.adminlivria.statscontext.presentation.StatsViewModelFactory
 
@@ -51,8 +59,9 @@ fun AdminNavGraph(
     val context = LocalContext.current
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
+    Log.d("AdminNavGraph", "token=${tokenManager.getToken()} adminId=${tokenManager.getAdminId()}")
 
-    // --- 1. DEFINICIÓN DE FACTORÍAS ---
+
     val loginViewModelFactory = LoginViewModelFactory(
         authService = authServiceInstance,
         tokenManager = tokenManager
@@ -62,30 +71,43 @@ fun AdminNavGraph(
         tokenManager = tokenManager
     )
 
+    val homeViewModelFactory = remember {
+        HomeViewModelFactory(
+            userAdminService = userAdminServiceInstance,
+            tokenManager = tokenManager
+        )
+    }
+
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val settingsViewModel: SettingsViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
         factory = settingsViewModelFactory
     )
-    val settingsState by settingsViewModel.uiState.collectAsState()
-
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    val adminUser = AdminUser.mock().copy(capital = settingsState.capital)
-
 
     val booksViewModel: BooksManagementViewModel = viewModel(
         factory = BooksViewModelFactory(context)
     )
 
-        Scaffold(
+    val ordersViewModel: OrdersViewModel = viewModel(
+        factory = OrdersViewModelFactory(context)
+    )
+
+
+    Scaffold(
         topBar = {
             if (showBars) {
-                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
+                LivriaTopBar(
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
             }
         },
         bottomBar = {
@@ -98,17 +120,18 @@ fun AdminNavGraph(
         NavHost(
             navController = navController,
             startDestination = if (tokenManager.getToken() != null)
-                NavDestinations.HOME_ROUTE else NavDestinations.LOGIN_ROUTE,
+                NavDestinations.HOME_ROUTE
+            else
+                NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
+            // --- LOGIN ---
             composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
                 LoginScreen(
-                    viewModel = loginViewModel, // <-- Se pasa el ViewModel
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
-                        // Forzar la carga de datos del admin al iniciar sesión para obtener el capital
-                        settingsViewModel.loadAdminData()
                         navController.navigate(NavDestinations.HOME_ROUTE) {
                             popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
                         }
@@ -116,13 +139,23 @@ fun AdminNavGraph(
                 )
             }
 
-            // 1. HOME (Rutas que requieren autenticación)
+            // --- HOME ---
             composable(route = NavDestinations.HOME_ROUTE) {
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    navController = navController,
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
             }
 
-            // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
+            // --- SETTINGS ---
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
+                val settingsViewModelFactory = SettingsViewModelFactory(
+                    userAdminService = userAdminServiceInstance,
+                    tokenManager = tokenManager
+                )
+                val settingsViewModel: SettingsViewModel = viewModel(factory = settingsViewModelFactory)
+
                 SettingsScreen(
                     viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
                     onLogout = { // <-- Se pasa el callback onLogout
@@ -134,18 +167,21 @@ fun AdminNavGraph(
                 )
             }
 
-            // 3. RUTAS DE LA BARRA INFERIOR
+            //  RUTAS DE LA BARRA INFERIOR
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
-                    navController = navController,     // 👈 necesario para navegar al detalle
+                    navController = navController,
                     viewModel = booksViewModel
                 )
             }
             composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
-                OrdersScreen(navController = navController)
+                OrdersScreen(
+                    navController = navController,
+                    viewModel = ordersViewModel
+                )
             }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                AddBookScreen()
+                AddBookScreen(navController = navController)
             }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
 
@@ -154,13 +190,24 @@ fun AdminNavGraph(
                 )
             }
 
-            // 4. RUTAS DETALLE
             composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
                 val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
                 BookDetailScreen(bookId = id)
             }
-            composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
-            composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
-        }
+
+            composable("${NavDestinations.ORDER_DETAIL_ROUTE}/{orderid}") { backStack ->
+                val id = backStack.arguments?.getString("orderid")?.toIntOrNull() ?: return@composable
+                OrderDetailScreen(orderId = id)
+            }
+
+            composable("${NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE}/{bookId}") { backStack ->
+                val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
+                StockScreen(
+                    bookId = id,
+                    settingsViewModel = settingsViewModel
+                )
+            }        }
     }
+
+
 }

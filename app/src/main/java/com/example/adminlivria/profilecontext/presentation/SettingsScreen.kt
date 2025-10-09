@@ -1,5 +1,6 @@
 package com.example.adminlivria.profilecontext.presentation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -38,25 +39,29 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onLogout: () -> Unit
 ) {
-    // CORRECCIÓN: Colectar el StateFlow para obtener el objeto SettingsUiState
+    val TAG = "SettingsScreen"
     val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        Log.d(TAG, "SettingsScreen composed. VM=${viewModel.hashCode()} capital=${state.capital}")
+    }
 
-    // Configuración del Snackbar para mostrar mensajes de éxito/error
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Manejo de errores de carga inicial
+
+
     LaunchedEffect(state.initialLoadError) {
         if (state.initialLoadError != null) {
             snackbarHostState.showSnackbar("Error al cargar datos: ${state.initialLoadError}")
         }
     }
 
-    // Manejo de éxito al guardar
     LaunchedEffect(state.saveSuccess) {
         if (state.saveSuccess) {
             snackbarHostState.showSnackbar("¡Datos actualizados exitosamente!")
         }
     }
+
+
 
 
     Scaffold(

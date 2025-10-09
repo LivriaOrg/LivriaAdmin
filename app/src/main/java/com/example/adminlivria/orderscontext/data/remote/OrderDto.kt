@@ -3,6 +3,9 @@ import com.example.adminlivria.orderscontext.domain.Item
 import com.example.adminlivria.orderscontext.domain.Order
 import com.example.adminlivria.orderscontext.domain.Shipping
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 // DTO para la dirección de envío
 data class ShippingDto(
@@ -35,7 +38,7 @@ data class OrderDto(
     val recipientName: String,
     val status: String,
     @SerializedName("isDelivery")
-    var isDelivery: Boolean = false,
+    var isDelivery: Boolean,
 
     val shipping: ShippingDto,
     val total: Double,
@@ -46,8 +49,7 @@ data class OrderDto(
 // --- Extension Functions (Mappers) ---
 
 // Mapea de DTO a la Entidad de Dominio
-fun OrderDto.toDomain(): Order {
-    return Order(
+fun OrderDto.toDomain() = Order(
         id = id,
         code = code,
         userClientId = userClientId,
@@ -59,10 +61,14 @@ fun OrderDto.toDomain(): Order {
         isDelivery = isDelivery,
         shipping = shipping.toDomain(),
         total = total,
-        date = Instant.parse(date),
+        date = try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+            LocalDateTime.parse(date, formatter).toInstant(ZoneOffset.UTC)
+        } catch (e: Exception) {
+            Instant.now()
+        },
         items = items.map { it.toDomain() }
     )
-}
 
 fun ShippingDto.toDomain() = Shipping(address, city, district, reference)
 fun ItemDto.toDomain() = Item(id, bookId, bookTitle, bookAuthor, bookPrice, bookCover, quantity, itemTotal)
