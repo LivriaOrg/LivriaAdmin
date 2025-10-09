@@ -1,18 +1,58 @@
 package com.example.adminlivria.common
 
+import android.content.Context
+import com.example.adminlivria.data.local.TokenManager
 import com.example.adminlivria.data.remote.AuthService
+import com.example.adminlivria.data.remote.UserAdminService
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
+const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
 
-private fun provideRetrofit(): Retrofit {
-    return Retrofit.Builder()
+private lateinit var tokenManager: TokenManager
+
+fun initializeTokenManager(context: Context) {
+    tokenManager = TokenManager(context)
+}
+
+
+private fun createOkHttpClient(): OkHttpClient {
+
+    val authInterceptor = okhttp3.Interceptor { chain ->
+        val originalRequest = chain.request()
+
+        val token = tokenManager.getToken()
+
+        val newRequest = if (token != null) {
+            originalRequest.newBuilder()
+                .header("Authorization", "Bearer $token")
+                .build()
+        } else {
+            originalRequest
+        }
+
+        chain.proceed(newRequest)
+    }
+
+    return OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
+        .build()
+}
+
+
+private val retrofit: Retrofit by lazy {
+    Retrofit.Builder()
         .baseUrl(BASE_URL)
+        .client(createOkHttpClient())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 }
 
 val authServiceInstance: AuthService by lazy {
-    provideRetrofit().create(AuthService::class.java)
+    retrofit.create(AuthService::class.java)
+}
+
+val userAdminServiceInstance: UserAdminService by lazy {
+    retrofit.create(UserAdminService::class.java)
 }

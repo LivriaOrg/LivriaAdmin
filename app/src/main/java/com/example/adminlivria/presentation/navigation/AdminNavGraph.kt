@@ -8,37 +8,80 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.adminlivria.common.authServiceInstance
+import com.example.adminlivria.data.local.TokenManager
 import com.example.adminlivria.domain.profilecontext.entity.AdminUser
 import com.example.adminlivria.presentation.components.LivriaBottomNavBar
 import com.example.adminlivria.presentation.components.LivriaTopBar
 import com.example.adminlivria.presentation.home.HomeScreen
 import com.example.adminlivria.presentation.settings.SettingsScreen
 import com.example.adminlivria.presentation.login.LoginScreen
+import com.example.adminlivria.presentation.login.LoginViewModel
+import com.example.adminlivria.presentation.login.LoginViewModelFactory
+import com.example.adminlivria.common.initializeTokenManager
+import com.example.adminlivria.common.userAdminServiceInstance
+import com.example.adminlivria.presentation.settings.SettingsViewModel
+import com.example.adminlivria.presentation.settings.SettingsViewModelFactory
 
 @Composable
 fun AdminNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
+    val context = LocalContext.current
+    initializeTokenManager(context)
+    val tokenManager = TokenManager(context)
+    val loginViewModelFactory = LoginViewModelFactory(
+        authService = authServiceInstance,
+        tokenManager = tokenManager
+    )
+
+    val settingsViewModelFactory = SettingsViewModelFactory(
+        userAdminService = userAdminServiceInstance,
+        tokenManager = tokenManager
+    )
+
+
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
+        "No ViewModelStoreOwner was provided."
+    }
+
+    val settingsViewModel: SettingsViewModel = viewModel(
+        viewModelStoreOwner = viewModelStoreOwner,
+        factory = settingsViewModelFactory
+    )
+
+    val settingsState = settingsViewModel.uiState
+
+    val adminUser = AdminUser.mock().copy(
+        capital = settingsState.capital
+    )
+    // ----------------------------------------
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    val adminUser = AdminUser.mock()
-
     Scaffold(
         topBar = {
             if (showBars) {
-                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
+                LivriaTopBar(
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    currentUser = adminUser
+                )
             }
         },
         bottomBar = {
@@ -55,8 +98,11 @@ fun AdminNavGraph(
         ) {
 
             composable(route = NavDestinations.LOGIN_ROUTE) {
+                val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
                 LoginScreen(
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
+                        settingsViewModel.loadAdminData()
                         navController.navigate(NavDestinations.HOME_ROUTE) {
                             popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
                         }
@@ -71,7 +117,14 @@ fun AdminNavGraph(
 
             // 2. SETTINGS (RUTA BARRA SUPERIOR)
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
-                SettingsScreen()
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    onLogout = {
+                        navController.navigate(NavDestinations.LOGIN_ROUTE) {
+                            popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
+                        }
+                    }
+                )
             }
 
             // 3. RUTAS DE LA BARRA INFERIOR
