@@ -46,6 +46,7 @@ import com.example.adminlivria.bookcontext.presentation.stock.StockScreen
 import kotlinx.coroutines.launch
 import com.example.adminlivria.orderscontext.presentation.OrdersViewModel
 import com.example.adminlivria.orderscontext.presentation.OrdersViewModelFactory
+import com.example.adminlivria.orderscontext.presentation.orderdetail.OrderDetailScreen
 
 @Composable
 fun AdminNavGraph(
@@ -152,7 +153,6 @@ fun AdminNavGraph(
                 )
             }
 
-
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
                     navController = navController,
@@ -176,12 +176,16 @@ fun AdminNavGraph(
                 }
             }
 
-
             composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
                 val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
                 BookDetailScreen(bookId = id)
             }
-            composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
+
+            composable("${NavDestinations.ORDER_DETAIL_ROUTE}/{orderid}") { backStack ->
+                val id = backStack.arguments?.getString("orderid")?.toIntOrNull() ?: return@composable
+                OrderDetailScreen(orderId = id)
+            }
+
             composable("${NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE}/{bookId}") { backStack ->
                 val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
                 StockScreen(

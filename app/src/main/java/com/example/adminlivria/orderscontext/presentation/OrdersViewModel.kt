@@ -62,22 +62,4 @@ class OrdersViewModel(
         }
     }
 
-
-    // PUT /api/v1/orders/{orderId}/status - Actualizar estado
-    /*fun updateOrderStatus(orderId: Int, newStatus: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            when (repository.updateOrderStatus(orderId, newStatus)) {
-                is Resource.Success -> {
-                    loadOrderById(orderId)
-                }
-                is Resource.Error -> {
-                    _state.update {
-                        it.copy(isLoading = false, error = "Error al actualizar estado. Intente de nuevo.")
-                    }
-                }
-            }
-        }
-    }*/
 }

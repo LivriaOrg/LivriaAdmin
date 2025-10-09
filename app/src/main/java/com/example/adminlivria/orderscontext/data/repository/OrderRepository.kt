@@ -6,6 +6,8 @@ import com.example.adminlivria.orderscontext.data.local.OrderDao
 import com.example.adminlivria.orderscontext.data.remote.OrderService
 import com.example.adminlivria.orderscontext.domain.Order
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import toDomain
 
@@ -27,6 +29,21 @@ class OrderRepository(
             return@withContext Resource.Error(response.errorBody()?.string() ?: "No orders available")
         } catch (e: Exception) {
             return@withContext Resource.Error(e.message ?: "Error de red")
+        }
+    }
+
+    suspend fun getOrderById(orderId: Int): Resource<Order> = withContext(Dispatchers.IO) {
+        try {
+            val response = service.getOrderById(orderId)
+            if (response.isSuccessful) {
+                response.body()?.let { orderDto ->
+                    val order = orderDto.toDomain()
+                    return@withContext Resource.Success(data = order)
+                }
+            }
+            return@withContext Resource.Error(response.errorBody()?.string() ?: "Order not found")
+        } catch (e: Exception) {
+            return@withContext Resource.Error(e.message ?: "Network error")
         }
     }
 
