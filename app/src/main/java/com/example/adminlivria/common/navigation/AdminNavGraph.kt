@@ -1,40 +1,41 @@
 package com.example.adminlivria.common.navigation
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.adminlivria.profilecontext.domain.AdminUser
 import com.example.adminlivria.common.components.LivriaBottomNavBar
 import com.example.adminlivria.common.components.LivriaTopBar
-import com.example.adminlivria.searchcontext.presentation.HomeScreen
-import com.example.adminlivria.profilecontext.presentation.SettingsScreen
+import com.example.adminlivria.profilecontext.domain.AdminUser
 import com.example.adminlivria.profilecontext.presentation.LoginScreen
+import com.example.adminlivria.profilecontext.presentation.LoginViewModel
+import com.example.adminlivria.profilecontext.presentation.LoginViewModelFactory
+import com.example.adminlivria.profilecontext.presentation.SettingsScreen
+import com.example.adminlivria.profilecontext.presentation.SettingsViewModel
+import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory
+import com.example.adminlivria.searchcontext.presentation.HomeScreen
 import com.example.adminlivria.orderscontext.presentation.OrdersScreen
 
-// --- IMPORTACIONES DE FÁBRICAS Y VIEWMODELS (Asumiendo nombres) ---
-import com.example.adminlivria.profilecontext.data.local.TokenManager // Necesario para ViewModels
-import com.example.adminlivria.common.authServiceInstance // Necesario para ViewModels
-import com.example.adminlivria.common.userAdminServiceInstance // Necesario para ViewModels
-import com.example.adminlivria.common.initializeTokenManager // Necesario para TokenManager
-import com.example.adminlivria.profilecontext.presentation.LoginViewModel // Asumo el paquete
-import com.example.adminlivria.profilecontext.presentation.LoginViewModelFactory // Asumo el paquete
-import com.example.adminlivria.profilecontext.presentation.SettingsViewModel // Asumo el paquete
-import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory// Asumo el paquete
-import androidx.compose.runtime.remember // Necesario para memoizar el ViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner // Necesario para Scope del ViewModel
-import androidx.compose.runtime.collectAsState // Necesario para el capital si el ViewModel lo usa
+// Token / services
+import com.example.adminlivria.profilecontext.data.local.TokenManager
+import com.example.adminlivria.common.authServiceInstance
+import com.example.adminlivria.common.userAdminServiceInstance
+import com.example.adminlivria.common.initializeTokenManager
 
+// 🔹 Books (usa el paquete correcto: bookscontext)
+import com.example.adminlivria.bookcontext.presentation.BooksScreen
+import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
+import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
 
 @Composable
 fun AdminNavGraph(
@@ -44,7 +45,7 @@ fun AdminNavGraph(
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
 
-    // --- 1. DEFINICIÓN DE FACTORÍAS ---
+    // Factories
     val loginViewModelFactory = LoginViewModelFactory(
         authService = authServiceInstance,
         tokenManager = tokenManager
@@ -54,36 +55,38 @@ fun AdminNavGraph(
         tokenManager = tokenManager
     )
 
-    // --- 2. INSTANCIA COMPARTIDA DE SETTINGS VIEWMODEL (PARA LA BARRA SUPERIOR) ---
+    // VM compartido para TopBar
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided."
     }
-
     val settingsViewModel: SettingsViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
         factory = settingsViewModelFactory
     )
 
-    // Observar el estado de SettingsViewModel para el capital
-    // Nota: Como estamos en un NavGraph, debemos usar el mecanismo correcto de observación.
     val settingsState by settingsViewModel.uiState.collectAsState()
-
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    // Crear AdminUser con el capital real (se actualizará reactivamente)
     val adminUser = AdminUser.mock().copy(
         capital = settingsState.capital
     )
 
+    // 🔹 BooksViewModel con Factory (Room dentro)
+    val booksViewModel: BooksManagementViewModel = viewModel(
+        factory = BooksViewModelFactory(context)
+    )
 
     Scaffold(
         topBar = {
             if (showBars) {
-                LivriaTopBar(navController = navController, currentRoute = currentRoute, currentUser = adminUser)
+                LivriaTopBar(
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    currentUser = adminUser
+                )
             }
         },
         bottomBar = {
@@ -95,18 +98,19 @@ fun AdminNavGraph(
 
         NavHost(
             navController = navController,
-            // Cambiado a LOGIN_ROUTE como ruta de inicio habitual si no hay token
-            startDestination = if (tokenManager.getToken() != null) NavDestinations.HOME_ROUTE else NavDestinations.LOGIN_ROUTE,
+            startDestination = if (tokenManager.getToken() != null)
+                NavDestinations.HOME_ROUTE
+            else
+                NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // RUTA LOGIN CORREGIDA
+            // LOGIN
             composable(route = NavDestinations.LOGIN_ROUTE) {
-                val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory) // <-- Se pasa el ViewModel
+                val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
                 LoginScreen(
-                    viewModel = loginViewModel, // <-- Se pasa el ViewModel
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
-                        // Forzar la carga de datos del admin al iniciar sesión para obtener el capital
                         settingsViewModel.loadAdminData()
                         navController.navigate(NavDestinations.HOME_ROUTE) {
                             popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
@@ -115,16 +119,16 @@ fun AdminNavGraph(
                 )
             }
 
-            // 1. HOME (Rutas que requieren autenticación)
+            // HOME
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(navController = navController)
             }
 
-            // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
+            // SETTINGS (TopBar)
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 SettingsScreen(
-                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
-                    onLogout = { // <-- Se pasa el callback onLogout
+                    viewModel = settingsViewModel,
+                    onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -133,38 +137,25 @@ fun AdminNavGraph(
                 )
             }
 
-            // 3. RUTAS DE LA BARRA INFERIOR
+            // 🔹 BOTTOM BAR ROUTES
             composable(route = NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
-                val context = LocalContext.current
-
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "BOOKS!", Toast.LENGTH_SHORT).show()
-                }
+                // Pasamos el VM inyectado (opcional, pero recomendado para compartir estado)
+                BooksScreen(viewModel = booksViewModel)
             }
             composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
                 OrdersScreen(navController = navController)
             }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
-                val context = LocalContext.current
-
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "INVENTORY!", Toast.LENGTH_SHORT).show()
-                }
+                // TODO: InventoryScreen()
             }
             composable(route = NavDestinations.STATISTICS_ROUTE) {
-                val context = LocalContext.current
-
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "STATS!", Toast.LENGTH_SHORT).show()
-                }
+                // TODO: StatisticsScreen()
             }
 
-            // 4. RUTAS DETALLE
-            composable(route = NavDestinations.BOOK_DETAIL_ROUTE) {  }
-            composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
-            composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
+            // Detalles
+            composable(route = NavDestinations.BOOK_DETAIL_ROUTE) { /* TODO */ }
+            composable(route = NavDestinations.ORDER_DETAIL_ROUTE) { /* TODO */ }
+            composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) { /* TODO */ }
         }
     }
-    // ELIMINACIÓN DE CODIGO DUPLICADO (ESTO CAUSABA PROBLEMAS)
-    // composable(route = NavDestinations.LOGIN_ROUTE) { ... }
 }
