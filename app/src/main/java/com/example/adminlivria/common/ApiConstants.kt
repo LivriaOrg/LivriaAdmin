@@ -3,7 +3,7 @@ package com.example.adminlivria.common
 import com.example.adminlivria.profilecontext.data.remote.AuthService
 import android.content.Context
 import com.example.adminlivria.profilecontext.data.local.TokenManager
-import com.example.adminlivria.data.remote.UserAdminService
+import com.example.adminlivria.profilecontext.data.remote.UserAdminService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -50,7 +50,7 @@ private val retrofit: Retrofit by lazy {
 }
 
 val authServiceInstance: AuthService by lazy {
-    provideRetrofit().create(AuthService::class.java)
+    retrofit.create(AuthService::class.java)
 }
 
 val userAdminServiceInstance: UserAdminService by lazy {

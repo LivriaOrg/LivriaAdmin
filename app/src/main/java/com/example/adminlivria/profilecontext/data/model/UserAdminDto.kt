@@ -1,4 +1,5 @@
-package com.example.adminlivria.data.model
+package com.example.adminlivria.profilecontext.data.model
+
 
 import com.google.gson.annotations.SerializedName
 

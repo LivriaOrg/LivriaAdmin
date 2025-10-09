@@ -1,13 +1,15 @@
-package com.example.adminlivria.presentation.settings
+package com.example.adminlivria.profilecontext.presentation
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.adminlivria.profilecontext.data.local.TokenManager
-import com.example.adminlivria.data.remote.UserAdminService
-import com.example.adminlivria.data.model.UserAdminDto
+import com.example.adminlivria.profilecontext.data.remote.UserAdminService
+import com.example.adminlivria.profilecontext.data.model.UserAdminDto
+// NUEVOS IMPORTS para Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -37,8 +39,10 @@ class SettingsViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    var uiState by mutableStateOf(SettingsUiState())
-        private set
+    // CAMBIO CLAVE: Usamos MutableStateFlow internamente
+    private val _uiState = MutableStateFlow(SettingsUiState())
+    // Y lo exponemos como StateFlow inmutable para ser consumido por Compose
+    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     private val adminId: Int = tokenManager.getAdminId()
 
@@ -48,26 +52,30 @@ class SettingsViewModel(
 
 
     fun updateField(field: String, value: String) {
-        val updatedState = when (field) {
-            "fullName" -> uiState.copy(display = value)
-            "username" -> uiState.copy(username = value)
-            "email" -> uiState.copy(email = value)
-            "securityPin" -> uiState.copy(securityPin = value)
-            else -> uiState
+        _uiState.update { currentState ->
+            val updatedState = when (field) {
+                "fullName" -> currentState.copy(display = value)
+                "username" -> currentState.copy(username = value)
+                "email" -> currentState.copy(email = value)
+                "securityPin" -> currentState.copy(securityPin = value)
+                else -> currentState
+            }
+            updatedState.copy(saveSuccess = false, saveError = null)
         }
-        uiState = updatedState.copy(saveSuccess = false, saveError = null)
     }
 
     fun setTab(isProfile: Boolean) {
-        uiState = uiState.copy(isProfileTabSelected = isProfile)
+        _uiState.update { it.copy(isProfileTabSelected = isProfile) }
     }
 
     fun updateApplicationSetting(setting: String, isEnabled: Boolean) {
-        uiState = when (setting) {
-            "notifications" -> uiState.copy(receiveNotifications = isEnabled, saveSuccess = false)
-            "emailAlerts" -> uiState.copy(receiveEmailAlerts = isEnabled, saveSuccess = false)
-            "autoSave" -> uiState.copy(autoSaveEnabled = isEnabled, saveSuccess = false)
-            else -> uiState
+        _uiState.update { currentState ->
+            when (setting) {
+                "notifications" -> currentState.copy(receiveNotifications = isEnabled, saveSuccess = false)
+                "emailAlerts" -> currentState.copy(receiveEmailAlerts = isEnabled, saveSuccess = false)
+                "autoSave" -> currentState.copy(autoSaveEnabled = isEnabled, saveSuccess = false)
+                else -> currentState
+            }
         }
     }
 
@@ -79,11 +87,11 @@ class SettingsViewModel(
 
     fun loadAdminData() {
         if (adminId == 0) {
-            uiState = uiState.copy(initialLoadError = "Error: Sesión no válida. Por favor, vuelva a iniciar sesión.", isLoading = false)
+            _uiState.update { it.copy(initialLoadError = "Error: Sesión no válida. Por favor, vuelva a iniciar sesión.", isLoading = false) }
             return
         }
 
-        uiState = uiState.copy(isLoading = true, initialLoadError = null)
+        _uiState.update { it.copy(isLoading = true, initialLoadError = null) }
 
         viewModelScope.launch {
             try {
@@ -93,20 +101,22 @@ class SettingsViewModel(
                     val adminList = response.body()
                     val adminDto = adminList?.firstOrNull()
                     adminDto?.let {
-                        uiState = uiState.copy(
-                            display = it.display,
-                            username = it.username,
-                            email = it.email,
-                            securityPin = it.securityPin,
-                            capital = adminDto.capital,
-                            isLoading = false
-                        )
+                        _uiState.update { state ->
+                            state.copy(
+                                display = it.display,
+                                username = it.username,
+                                email = it.email,
+                                securityPin = it.securityPin,
+                                capital = adminDto.capital,
+                                isLoading = false
+                            )
+                        }
                     }
                 } else {
-                    uiState = uiState.copy(
+                    _uiState.update { it.copy(
                         initialLoadError = "No se pudieron cargar los datos. (Error ${response.code()})",
                         isLoading = false
-                    )
+                    ) }
                 }
             } catch (e: Exception) {
                 val errorMsg = when (e) {
@@ -114,44 +124,45 @@ class SettingsViewModel(
                     is IOException -> "Error de conexión al cargar. Verifique su red."
                     else -> "Ocurrió un error inesperado al cargar los datos."
                 }
-                uiState = uiState.copy(initialLoadError = errorMsg, isLoading = false)
+                _uiState.update { it.copy(initialLoadError = errorMsg, isLoading = false) }
             }
         }
     }
 
 
     fun saveChanges() {
-        if (adminId == 0 || uiState.display.isBlank() || uiState.username.isBlank() || uiState.email.isBlank() || uiState.securityPin.isBlank()) {
-            uiState = uiState.copy(saveError = "Datos incompletos o sesión inválida.")
+        if (adminId == 0 || uiState.value.display.isBlank() || uiState.value.username.isBlank() || uiState.value.email.isBlank() || uiState.value.securityPin.isBlank()) {
+            _uiState.update { it.copy(saveError = "Datos incompletos o sesión inválida.") }
             return
         }
 
-        uiState = uiState.copy(isSaving = true, saveSuccess = false, saveError = null)
+        _uiState.update { it.copy(isSaving = true, saveSuccess = false, saveError = null) }
 
         viewModelScope.launch {
             try {
+                val currentState = uiState.value
                 val requestDto = UserAdminDto(
                     id = adminId,
-                    display = uiState.display,
-                    username = uiState.username,
-                    email = uiState.email,
+                    display = currentState.display,
+                    username = currentState.username,
+                    email = currentState.email,
                     adminAccess = true,
-                    securityPin = uiState.securityPin,
-                    capital = uiState.capital
+                    securityPin = currentState.securityPin,
+                    capital = currentState.capital
                 )
 
                 val response = userAdminService.updateUserAdmin(adminId, requestDto)
 
                 if (response.isSuccessful) {
-                    uiState = uiState.copy(isSaving = false, saveSuccess = true, saveError = null)
+                    _uiState.update { it.copy(isSaving = false, saveSuccess = true, saveError = null) }
                 } else {
                     val errorMsg = response.errorBody()?.string() ?: "Error desconocido al guardar."
-                    uiState = uiState.copy(isSaving = false, saveSuccess = false, saveError = "Error ${response.code()}: $errorMsg")
+                    _uiState.update { it.copy(isSaving = false, saveSuccess = false, saveError = "Error ${response.code()}: $errorMsg") }
                 }
 
-                if (uiState.saveSuccess) {
+                if (uiState.value.saveSuccess) {
                     delay(3000)
-                    uiState = uiState.copy(saveSuccess = false)
+                    _uiState.update { it.copy(saveSuccess = false) }
                 }
 
             } catch (e: Exception) {
@@ -160,7 +171,7 @@ class SettingsViewModel(
                     is IOException -> "Error de conexión al guardar. Verifique su red."
                     else -> "Ocurrió un error inesperado al guardar los datos."
                 }
-                uiState = uiState.copy(isSaving = false, saveSuccess = false, saveError = errorMsg)
+                _uiState.update { it.copy(isSaving = false, saveSuccess = false, saveError = errorMsg) }
             }
         }
     }

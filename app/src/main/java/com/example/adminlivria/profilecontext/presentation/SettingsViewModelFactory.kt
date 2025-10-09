@@ -1,9 +1,9 @@
-package com.example.adminlivria.presentation.settings
+package com.example.adminlivria.profilecontext.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.adminlivria.profilecontext.data.local.TokenManager
-import com.example.adminlivria.data.remote.UserAdminService
+import com.example.adminlivria.profilecontext.data.remote.UserAdminService
 import java.lang.IllegalArgumentException
 
 

@@ -1,4 +1,4 @@
-package com.example.adminlivria.presentation.login
+package com.example.adminlivria.profilecontext.presentation
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
