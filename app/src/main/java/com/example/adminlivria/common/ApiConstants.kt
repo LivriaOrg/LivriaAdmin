@@ -13,7 +13,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
+import com.example.adminlivria.bookcontext.data.remote.BookService
+
+const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
+
 private lateinit var tokenManager: TokenManager
 
 fun initializeTokenManager(context: Context) {
@@ -71,6 +74,9 @@ val userAdminServiceInstance: UserAdminService by lazy {
     retrofit.create(UserAdminService::class.java)
 }
 
+val bookServiceInstance: BookService by lazy {
+    retrofit.create(BookService::class.java)
+}
 val orderServiceInstance: OrderService by lazy {
     retrofit.create(OrderService::class.java)
 }

@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // 👇 AÑADE KSP (elige UNA de estas dos opciones)
+
+    // Opción A: si usas Version Catalog (recomendado)
+    alias(libs.plugins.ksp)
+
+    // Opción B: si NO tienes el plugin en el catalogo, usa versión directa:
+    // id("com.google.devtools.ksp") version "2.0.21-1.0.25"
 }
 
 android {
@@ -40,10 +47,6 @@ android {
     }
 }
 
-configurations.all {
-    exclude(group = "com.google.auto.value", module = "auto-value")
-}
-
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -56,6 +59,19 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.foundation.layout)
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+    implementation("androidx.navigation:navigation-compose:2.9.4")
+
     //implementation(libs.androidx.room.compiler.processing.testing)
     implementation("io.coil-kt:coil-compose:2.6.0")
     testImplementation(libs.junit)
@@ -71,10 +87,6 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
 
     implementation("io.insert-koin:koin-android:3.5.0")
     implementation("com.google.dagger:hilt-android:2.50")

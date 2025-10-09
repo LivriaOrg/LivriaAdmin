@@ -15,6 +15,7 @@ roomCompilerProcessingTesting = "2.8.1"
 volley = "1.2.1"
 foundation = "1.9.2"
 firebaseCrashlyticsBuildtools = "3.0.6"
+ksp = "2.0.21-1.0.25"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,4 +42,5 @@ firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "fireb
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

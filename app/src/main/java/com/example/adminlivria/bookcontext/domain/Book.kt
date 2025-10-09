@@ -5,10 +5,10 @@ data class Book(
     val title: String,
     val description: String,
     val author: String,
-    val salePrice: Double,
+    val genre: String,
+    val language: String,
+    val price: Double,
     val purchasePrice: Double,
     val stock: Int,
-    val cover: String,
-    val genre: String,
-    val language: String
+    val cover: String
 )
