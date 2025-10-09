@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 import com.example.adminlivria.bookcontext.data.remote.BookService
 
-const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
+const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
 
 private lateinit var tokenManager: TokenManager
 
