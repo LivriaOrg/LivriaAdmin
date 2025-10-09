@@ -134,12 +134,11 @@ fun AdminNavGraph(
             }
 
             // 3. RUTAS DE LA BARRA INFERIOR
-            composable(route = NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
-                val context = LocalContext.current
-
-                LaunchedEffect(Unit) {
-                    Toast.makeText(context, "BOOKS!", Toast.LENGTH_SHORT).show()
-                }
+            composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
+                BooksScreen(
+                    navController = navController,     // 👈 necesario para navegar al detalle
+                    viewModel = booksViewModel
+                )
             }
             composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
                 OrdersScreen(navController = navController)
@@ -156,7 +155,10 @@ fun AdminNavGraph(
             }
 
             // 4. RUTAS DETALLE
-            composable(route = NavDestinations.BOOK_DETAIL_ROUTE) {  }
+            composable("${NavDestinations.BOOK_DETAIL_ROUTE}/{bookId}") { backStack ->
+                val id = backStack.arguments?.getString("bookId")?.toIntOrNull() ?: return@composable
+                BookDetailScreen(bookId = id)
+            }
             composable(route = NavDestinations.ORDER_DETAIL_ROUTE) {  }
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
         }

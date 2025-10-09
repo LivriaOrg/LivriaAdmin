@@ -38,6 +38,10 @@ class BooksRepository(
             android.util.Log.e("BooksRepo", "refreshBooks error", e)
         }
     }
+
+    suspend fun insertBook(book: Book) {
+        dao.upsertAll(listOf(book.toEntity()))
+    }
     fun getBookById(id: Int): Flow<Book?> =
         dao.getById(id).map { it?.toDomain() }
     suspend fun isEmpty(): Boolean = dao.count() == 0

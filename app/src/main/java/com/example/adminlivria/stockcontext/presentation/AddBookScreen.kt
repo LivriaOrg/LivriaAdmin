@@ -354,14 +354,15 @@ private fun CoverImagePicker(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
-            if (uri != null) {
-                onUriSelected(uri.toString())
+            uri?.let {
+                val flags = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+
+                context.contentResolver.takePersistableUriPermission(it, flags)
+
+                onUriSelected(it.toString())
             }
         }
     )
-    // Para la cámara, necesitarías un ActivityResultContract que dispare la cámara
-    // y maneje la URI de salida. Esto es un poco más complejo y podría requerir permisos.
-    // Por simplicidad, aquí solo mostramos el icono y sugerimos la implementación.
     // val cameraLauncher = rememberLauncherForActivityResult(
     //     contract = ActivityResultContracts.TakePicture(),
     //     onResult = { success: Boolean ->

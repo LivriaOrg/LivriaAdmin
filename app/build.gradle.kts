@@ -2,13 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // 👇 AÑADE KSP (elige UNA de estas dos opciones)
 
-    // Opción A: si usas Version Catalog (recomendado)
     alias(libs.plugins.ksp)
 
-    // Opción B: si NO tienes el plugin en el catalogo, usa versión directa:
-    // id("com.google.devtools.ksp") version "2.0.21-1.0.25"
+
 }
 
 android {
@@ -72,8 +69,6 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.9.4")
 
-    //implementation(libs.androidx.room.compiler.processing.testing)
-    implementation("io.coil-kt:coil-compose:2.6.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,18 +79,12 @@ dependencies {
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
 
     implementation("io.insert-koin:koin-android:3.5.0")
     implementation("com.google.dagger:hilt-android:2.50")
 
-    implementation("androidx.navigation:navigation-compose:2.9.4")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material3:material3-window-size-class")
 
     implementation("androidx.compose.material:material-icons-extended")
 }
-
-private fun DependencyHandlerScope.ksp(string: String) {}
