@@ -35,7 +35,7 @@ data class OrderDto(
     val recipientName: String,
     val status: String,
     @SerializedName("isDelivery")
-    var isDelivery: Boolean = false,
+    var isDelivery: Boolean,
 
     val shipping: ShippingDto,
     val total: Double,
@@ -46,8 +46,7 @@ data class OrderDto(
 // --- Extension Functions (Mappers) ---
 
 // Mapea de DTO a la Entidad de Dominio
-fun OrderDto.toDomain(): Order {
-    return Order(
+fun OrderDto.toDomain() = Order(
         id = id,
         code = code,
         userClientId = userClientId,
@@ -62,7 +61,6 @@ fun OrderDto.toDomain(): Order {
         date = Instant.parse(date),
         items = items.map { it.toDomain() }
     )
-}
 
 fun ShippingDto.toDomain() = Shipping(address, city, district, reference)
 fun ItemDto.toDomain() = Item(id, bookId, bookTitle, bookAuthor, bookPrice, bookCover, quantity, itemTotal)

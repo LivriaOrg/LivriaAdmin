@@ -44,6 +44,10 @@ fun SettingsScreen(
     // Configuración del Snackbar para mostrar mensajes de éxito/error
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadAdminData()
+    }
+
     // Manejo de errores de carga inicial
     LaunchedEffect(state.initialLoadError) {
         if (state.initialLoadError != null) {

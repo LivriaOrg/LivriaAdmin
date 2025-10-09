@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,10 +50,13 @@ import com.example.adminlivria.common.ui.theme.LivriaWhite
 @Composable
 fun OrdersScreen(
     navController: NavController,
-    viewModel: OrdersViewModel = viewModel()
+    viewModel: OrdersViewModel = viewModel(factory = OrdersViewModelFactory(LocalContext.current))
 ) {
+    val state = viewModel.state.value
+    val search = viewModel.search.value
+
     LaunchedEffect(Unit) {
-        viewModel.loadAllOrders()
+        //viewModel.loadAllOrders()
     }
 
     Scaffold { paddingValues ->
@@ -109,7 +113,7 @@ fun OrdersScreen(
                 )
             }
 
-            SearchNFilterCard(viewModel, viewModel.search)
+            SearchNFilterCard(viewModel, search)
 
         }
     }
@@ -196,6 +200,7 @@ fun SearchNFilterCard(
                 )
                 IconButton(
                     onClick = {
+                        viewModel.onSearchClicked()
                     },
                     modifier = Modifier
                         .size(24.dp)
@@ -211,14 +216,14 @@ fun SearchNFilterCard(
                 }
             }
             Row(
-
+                modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
                     value = search,
-                    onValueChange = { viewModel.onSearch(it) },
+                    onValueChange = { viewModel.onSearchEntered(it) },
                     label = {
                         Text(
-                            text = "Enter an Order ID or Customer Name",
+                            text = "Enter an Order Code or Customer Name",
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 14.sp
@@ -243,8 +248,11 @@ fun SearchNFilterCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 30.dp, vertical = 15.dp)
+                        .weight(4f)
                 )
-                Box(){
+                Box(
+                    Modifier.weight(1f)
+                ){
                     IconButton(
                         onClick = {
                             viewModel.onSearchClicked()

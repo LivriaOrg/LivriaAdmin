@@ -6,15 +6,11 @@ import retrofit2.http.*
 
 interface OrderService {
 
-    // 1. POST - Crear una nueva orden
-    @POST("orders")
-    suspend fun createOrder(@Body orderDto: OrderDto): Response<OrderDto>
-
-    // 2. GET Obtener todas las órdenes
+    // GET Obtener todas las órdenes
     @GET("orders")
     suspend fun getAllOrders(): Response<List<OrderDto>>
 
-    // 3. GET - Obtener orden por ID
+    // GET - Obtener orden por ID
     @GET("orders/{id}")
     suspend fun getOrderById(@Path("id") id: Int): Response<OrderDto>
 
@@ -29,11 +25,10 @@ interface OrderService {
     ): Response<List<OrderDto>>
 
     // 6. PUT orders/{orderId}/status - Actualizar el estado de una orden
-    // Asumimos que el body es un simple objeto que contiene el nuevo estado (ej: {"status": "DELIVERED"})
     @PUT("orders/{orderId}/status")
     suspend fun updateOrderStatus(
         @Path("orderId") orderId: Int,
-        @Body statusUpdate: Map<String, String> // Un mapa para enviar {"status": "NUEVO_ESTADO"}
-    ): Response<Unit> // La respuesta no necesita un cuerpo específico (Unit)
+        @Body statusUpdate: Map<String, String>
+    ): Response<Unit>
 
 }

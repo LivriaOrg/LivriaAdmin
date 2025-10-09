@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 import com.example.adminlivria.bookcontext.data.remote.BookService
 
-const val BASE_URL = "http://10.0.2.2:5119/api/v1/"
+const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
 
 private lateinit var tokenManager: TokenManager
 
@@ -77,15 +77,7 @@ val userAdminServiceInstance: UserAdminService by lazy {
 val bookServiceInstance: BookService by lazy {
     retrofit.create(BookService::class.java)
 }
+
 val orderServiceInstance: OrderService by lazy {
     retrofit.create(OrderService::class.java)
-}
-
-lateinit var orderDaoInstance: OrderDao
-
-val orderRepositoryInstance: OrderRepository by lazy {
-    OrderRepository(
-        service = orderServiceInstance,
-        dao = orderDaoInstance
-    )
 }

@@ -51,16 +51,3 @@ fun Order.toEntity(): OrderEntity {
         status = status
     )
 }
-
-fun Item.toItemEntity(orderId: Int): OrderItemEntity {
-    return OrderItemEntity(
-        bookId = bookId,
-        bookTitle = bookTitle,
-        bookAuthor = bookAuthor,
-        bookPrice = bookPrice,
-        bookCover = bookCover,
-        quantity = quantity,
-        itemTotal = itemTotal,
-        orderId = orderId
-    )
-}

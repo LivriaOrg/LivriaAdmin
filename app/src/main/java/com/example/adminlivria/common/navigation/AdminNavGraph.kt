@@ -41,6 +41,8 @@ import com.example.adminlivria.bookcontext.presentation.BooksScreen
 import com.example.adminlivria.bookcontext.presentation.BooksManagementViewModel
 import com.example.adminlivria.bookcontext.presentation.BooksViewModelFactory
 import com.example.adminlivria.bookcontext.presentation.detail.BookDetailScreen
+import com.example.adminlivria.orderscontext.presentation.OrdersViewModel
+import com.example.adminlivria.orderscontext.presentation.OrdersViewModelFactory
 
 @Composable
 fun AdminNavGraph(
@@ -75,9 +77,12 @@ fun AdminNavGraph(
 
     val adminUser = AdminUser.mock().copy(capital = settingsState.capital)
 
-
     val booksViewModel: BooksManagementViewModel = viewModel(
         factory = BooksViewModelFactory(context)
+    )
+
+    val ordersViewModel: OrdersViewModel = viewModel(
+        factory = OrdersViewModelFactory(context)
     )
 
 
@@ -141,7 +146,10 @@ fun AdminNavGraph(
                 )
             }
             composable(route = NavDestinations.ORDERS_MANAGEMENT_ROUTE) {
-                OrdersScreen(navController = navController)
+                OrdersScreen(
+                    navController = navController,
+                    viewModel = ordersViewModel
+                )
             }
             composable(route = NavDestinations.INVENTORY_ADD_BOOK_ROUTE) {
                 AddBookScreen()
