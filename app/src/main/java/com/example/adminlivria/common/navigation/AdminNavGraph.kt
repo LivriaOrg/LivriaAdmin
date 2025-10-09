@@ -21,8 +21,9 @@ import com.example.adminlivria.searchcontext.presentation.HomeScreen
 import com.example.adminlivria.profilecontext.presentation.SettingsScreen
 import com.example.adminlivria.profilecontext.presentation.LoginScreen
 import com.example.adminlivria.orderscontext.presentation.OrdersScreen
+import com.example.adminlivria.stockcontext.presentation.AddBookScreen
 
-// --- IMPORTACIONES DE FÁBRICAS Y VIEWMODELS ---
+// --- IMPORTACIONES DE FÁBRICAS Y VIEWMODELS (Asumiendo nombres) ---
 import com.example.adminlivria.profilecontext.data.local.TokenManager // Necesario para ViewModels
 import com.example.adminlivria.common.authServiceInstance // Necesario para ViewModels
 import com.example.adminlivria.common.userAdminServiceInstance // Necesario para ViewModels
@@ -45,7 +46,6 @@ fun AdminNavGraph(
     initializeTokenManager(context)
     val tokenManager = TokenManager(context)
 
-    // --- 1. DEFINICIÓN DE FACTORÍAS ---
     val loginViewModelFactory = LoginViewModelFactory(
         authService = authServiceInstance,
         tokenManager = tokenManager
@@ -55,7 +55,6 @@ fun AdminNavGraph(
         tokenManager = tokenManager
     )
 
-    // --- 2. INSTANCIA COMPARTIDA DE SETTINGS VIEWMODEL (PARA LA BARRA SUPERIOR) ---
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided."
     }
@@ -65,8 +64,6 @@ fun AdminNavGraph(
         factory = settingsViewModelFactory
     )
 
-    // Observar el estado de SettingsViewModel para el capital
-    // Nota: Como estamos en un NavGraph, debemos usar el mecanismo correcto de observación.
     val settingsState by settingsViewModel.uiState.collectAsState()
 
 
@@ -75,7 +72,6 @@ fun AdminNavGraph(
 
     val showBars = currentRoute != NavDestinations.LOGIN_ROUTE
 
-    // Crear AdminUser con el capital real (se actualizará reactivamente)
     val adminUser = AdminUser.mock().copy(
         capital = settingsState.capital
     )
@@ -96,18 +92,15 @@ fun AdminNavGraph(
 
         NavHost(
             navController = navController,
-            // Cambiado a LOGIN_ROUTE como ruta de inicio habitual si no hay token
             startDestination = if (tokenManager.getToken() != null) NavDestinations.HOME_ROUTE else NavDestinations.LOGIN_ROUTE,
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // RUTA LOGIN CORREGIDA
             composable(route = NavDestinations.LOGIN_ROUTE) {
-                val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory) // <-- Se pasa el ViewModel
+                val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
                 LoginScreen(
-                    viewModel = loginViewModel, // <-- Se pasa el ViewModel
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
-                        // Forzar la carga de datos del admin al iniciar sesión para obtener el capital
                         settingsViewModel.loadAdminData()
                         navController.navigate(NavDestinations.HOME_ROUTE) {
                             popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
@@ -124,8 +117,8 @@ fun AdminNavGraph(
             // 2. SETTINGS (RUTA BARRA SUPERIOR) CORREGIDA
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 SettingsScreen(
-                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
-                    onLogout = { // <-- Se pasa el callback onLogout
+                    viewModel = settingsViewModel,
+                    onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -166,6 +159,5 @@ fun AdminNavGraph(
             composable(route = NavDestinations.INVENTORY_INDIVIDUAL_STOCK_ROUTE) {  }
         }
     }
-    // ELIMINACIÓN DE CODIGO DUPLICADO (ESTO CAUSABA PROBLEMAS)
-    // composable(route = NavDestinations.LOGIN_ROUTE) { ... }
+
 }

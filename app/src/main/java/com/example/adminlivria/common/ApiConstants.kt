@@ -7,7 +7,9 @@ import com.example.adminlivria.orderscontext.data.remote.OrderService
 import com.example.adminlivria.orderscontext.data.repository.OrderRepository
 import com.example.adminlivria.profilecontext.data.local.TokenManager
 import com.example.adminlivria.profilecontext.data.remote.UserAdminService
+import com.example.adminlivria.stockcontext.data.remote.InventoryService
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -21,6 +23,9 @@ fun initializeTokenManager(context: Context) {
 
 
 private fun createOkHttpClient(): OkHttpClient {
+    val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
 
     val authInterceptor = okhttp3.Interceptor { chain ->
         val originalRequest = chain.request()
@@ -39,9 +44,11 @@ private fun createOkHttpClient(): OkHttpClient {
     }
 
     return OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
         .addInterceptor(authInterceptor)
         .build()
 }
+
 
 
 private val retrofit: Retrofit by lazy {
@@ -54,6 +61,11 @@ private val retrofit: Retrofit by lazy {
 
 val authServiceInstance: AuthService by lazy {
     retrofit.create(AuthService::class.java)
+}
+
+
+val inventoryServiceInstance: InventoryService by lazy {
+    retrofit.create(InventoryService::class.java)
 }
 
 val userAdminServiceInstance: UserAdminService by lazy {

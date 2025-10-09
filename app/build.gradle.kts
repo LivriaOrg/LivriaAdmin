@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.foundation.layout)
     //implementation(libs.androidx.room.compiler.processing.testing)
+    implementation("io.coil-kt:coil-compose:2.6.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -64,8 +65,11 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // NECESARIO para @SerializedName
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
@@ -76,6 +80,10 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.50")
 
     implementation("androidx.navigation:navigation-compose:2.9.4")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-window-size-class")
+
+    implementation("androidx.compose.material:material-icons-extended")
 }
 
 private fun DependencyHandlerScope.ksp(string: String) {}
