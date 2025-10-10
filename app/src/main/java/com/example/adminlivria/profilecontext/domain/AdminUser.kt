@@ -1,8 +1,8 @@
 package com.example.adminlivria.profilecontext.domain
 
-// AdminUser hereda de User y añade sus propiedades únicas.
+
 data class AdminUser(
-    val id: String, // Clave única
+    val id: String,
     override val username: String,
     override val fullName: String,
     override val email: String,

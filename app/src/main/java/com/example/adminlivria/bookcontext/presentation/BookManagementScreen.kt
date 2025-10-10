@@ -36,7 +36,7 @@ fun BooksScreen(
     navController: NavController,
     viewModel: BooksManagementViewModel = viewModel(factory = BooksViewModelFactory(LocalContext.current))
 ) {
-    // ✅ Detectar cambios y refrescar automáticamente
+
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val refreshFlow = remember(savedStateHandle) {
         savedStateHandle?.getStateFlow("refresh_books", false)
@@ -59,7 +59,7 @@ fun BooksScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // -------- UI principal --------
+
     val search by viewModel.search.collectAsState()
     val stats by viewModel.stats.collectAsState()
     val books by viewModel.books.collectAsState()

@@ -40,15 +40,15 @@ class SettingsViewModel(
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
-    // CAMBIO CLAVE: Usamos MutableStateFlow internamente
+
     private val _uiState = MutableStateFlow(SettingsUiState())
-    // Y lo exponemos como StateFlow inmutable para ser consumido por Compose
+
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     private val adminId: Int = tokenManager.getAdminId()
 
     init {
-        // opcional: intentar cargar — pero loadAdminData leerá adminId en tiempo de ejecución
+
         viewModelScope.launch {
             loadAdminData()
         }

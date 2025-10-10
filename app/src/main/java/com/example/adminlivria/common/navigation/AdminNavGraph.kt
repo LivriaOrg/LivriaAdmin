@@ -25,17 +25,16 @@ import com.example.adminlivria.profilecontext.presentation.LoginScreen
 import com.example.adminlivria.orderscontext.presentation.OrdersScreen
 import com.example.adminlivria.stockcontext.presentation.AddBookScreen
 
-// --- IMPORTACIONES DE FÁBRICAS Y VIEWMODELS (Asumiendo nombres) ---
-import com.example.adminlivria.profilecontext.data.local.TokenManager // Necesario para ViewModels
-import com.example.adminlivria.common.authServiceInstance // Necesario para ViewModels
-import com.example.adminlivria.common.userAdminServiceInstance // Necesario para ViewModels
-import com.example.adminlivria.common.initializeTokenManager // Necesario para TokenManager
-import com.example.adminlivria.profilecontext.presentation.LoginViewModel // Asumo el paquete
-import com.example.adminlivria.profilecontext.presentation.LoginViewModelFactory // Asumo el paquete
-import com.example.adminlivria.profilecontext.presentation.SettingsViewModel // Asumo el paquete
-import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory// Asumo el paquete
-import androidx.compose.runtime.remember // Necesario para memoizar el ViewModel
-import androidx.compose.runtime.collectAsState // Necesario para el capital si el ViewModel lo usa
+import com.example.adminlivria.profilecontext.data.local.TokenManager
+import com.example.adminlivria.common.authServiceInstance
+import com.example.adminlivria.common.userAdminServiceInstance
+import com.example.adminlivria.common.initializeTokenManager
+import com.example.adminlivria.profilecontext.presentation.LoginViewModel
+import com.example.adminlivria.profilecontext.presentation.LoginViewModelFactory
+import com.example.adminlivria.profilecontext.presentation.SettingsViewModel
+import com.example.adminlivria.profilecontext.presentation.SettingsViewModelFactory
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 
 
@@ -126,7 +125,7 @@ fun AdminNavGraph(
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // --- LOGIN ---
+
             composable(NavDestinations.LOGIN_ROUTE) {
                 val loginViewModel: LoginViewModel = viewModel(factory = loginViewModelFactory)
                 LoginScreen(
@@ -139,7 +138,7 @@ fun AdminNavGraph(
                 )
             }
 
-            // --- HOME ---
+
             composable(route = NavDestinations.HOME_ROUTE) {
                 HomeScreen(
                     navController = navController,
@@ -148,7 +147,7 @@ fun AdminNavGraph(
                 )
             }
 
-            // --- SETTINGS ---
+
             composable(route = NavDestinations.SETTINGS_PROFILE_ROUTE) {
                 val settingsViewModelFactory = SettingsViewModelFactory(
                     userAdminService = userAdminServiceInstance,
@@ -157,8 +156,8 @@ fun AdminNavGraph(
                 val settingsViewModel: SettingsViewModel = viewModel(factory = settingsViewModelFactory)
 
                 SettingsScreen(
-                    viewModel = settingsViewModel, // <-- Se pasa el ViewModel compartido
-                    onLogout = { // <-- Se pasa el callback onLogout
+                    viewModel = settingsViewModel,
+                    onLogout = {
                         settingsViewModel.logout()
                         navController.navigate(NavDestinations.LOGIN_ROUTE) {
                             popUpTo(NavDestinations.HOME_ROUTE) { inclusive = true }
@@ -167,7 +166,7 @@ fun AdminNavGraph(
                 )
             }
 
-            //  RUTAS DE LA BARRA INFERIOR
+
             composable(NavDestinations.BOOKS_MANAGEMENT_ROUTE) {
                 BooksScreen(
                     navController = navController,

@@ -81,7 +81,7 @@ fun OrderDetailScreen(
                 state.data != null -> {
                     val order = state.data!!
 
-                    // --- ORDER DETAILS ---
+
                     SectionTitle("ORDER DETAILS")
                     DetailRow("ORDER CODE", "#${order.code}", LivriaOrange)
                     DetailRow("ORDER DATE", order.date
@@ -93,7 +93,7 @@ fun OrderDetailScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // --- CUSTOMER INFORMATION ---
+
                     SectionTitle("CUSTOMER INFORMATION")
                     DetailRow("CUSTOMER NAME", order.userFullName, LivriaBlue)
                     DetailRow("CUSTOMER EMAIL", order.userEmail, LivriaSoftCyan)
@@ -102,7 +102,7 @@ fun OrderDetailScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // --- ORDER ITEMS ---
+
                     SectionTitle("ORDER ITEMS")
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -113,7 +113,7 @@ fun OrderDetailScreen(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // --- UPDATE STATUS ---
+
                     SectionTitle("UPDATE STATUS")
 
                     var expanded by remember { mutableStateOf(false) }
