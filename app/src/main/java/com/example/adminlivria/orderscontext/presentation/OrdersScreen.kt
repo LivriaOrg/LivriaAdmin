@@ -99,22 +99,31 @@ fun OrdersScreen(
                     ),
                     modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 18.dp)
                 )
+
+                val orders = state.data ?: emptyList()
+                val totalOrders = orders.size
+                val totalRevenue = orders.sumOf { it.total }
+                val averageOrderValue = if (orders.isNotEmpty()) totalRevenue / totalOrders else 0.0
+                val pendingOrders = orders.count { it.status.equals("pending", ignoreCase = true) }
+                val completedOrders = orders.count { it.status.equals("delivered", ignoreCase = true) }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    MiniStats(modifier = Modifier.weight(1f), "Total Orders", "chvr")
-                    MiniStats(modifier = Modifier.weight(1f), "Total Revenue", "chvr")
-                    MiniStats(modifier = Modifier.weight(1f), "Average Order Value", "chvr")
+                    MiniStats(modifier = Modifier.weight(1f), "Total Orders", totalOrders.toString())
+                    MiniStats(modifier = Modifier.weight(1f), "Total Revenue", "S/ %.2f".format(totalRevenue))
+                    MiniStats(modifier = Modifier.weight(1f), "Average Order Value", "S/ %.2f".format(averageOrderValue))
                 }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    MiniStats(modifier = Modifier.weight(1f), "Pending Orders", "chvr")
-                    MiniStats(modifier = Modifier.weight(1f), "Completed Orders", "chvr")
+                    MiniStats(modifier = Modifier.weight(1f), "Pending Orders", pendingOrders.toString())
+                    MiniStats(modifier = Modifier.weight(1f), "Completed Orders", completedOrders.toString())
                 }
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth()
@@ -286,7 +295,6 @@ fun SearchNFilterCard(
                 modifier = Modifier.fillMaxWidth()
                     .padding(top = 18.dp)
             ) {
-                Spacer(Modifier.weight(1f))
                 Text(
                     text = "ORDERS",
                     style = MaterialTheme.typography.titleLarge.copy(
@@ -296,25 +304,8 @@ fun SearchNFilterCard(
                         fontSize = 20.sp,
                         letterSpacing = 2.sp
                     ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(2f)
+                    textAlign = TextAlign.Center
                 )
-                IconButton(
-                    onClick = {
-                        viewModel.onSearchClicked()
-                    },
-                    modifier = Modifier
-                        .size(24.dp)
-                        .background(Color.Transparent)
-                        .weight(1f)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_filter),
-                        contentDescription = "Filters",
-                        tint = LivriaOrange,
-                        modifier = Modifier.height(24.dp)
-                    )
-                }
             }
             Row(
                 modifier = Modifier
