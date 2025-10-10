@@ -45,9 +45,7 @@ import com.example.adminlivria.common.ui.theme.LivriaSoftCyan
 import com.example.adminlivria.common.ui.theme.LivriaWhite
 import com.example.adminlivria.common.ui.theme.LivriaYellowLight
 
-/**
- * Componente principal para agregar un nuevo libro al inventario.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBookScreen(navController: NavController) {
@@ -65,7 +63,7 @@ fun AddBookScreen(navController: NavController) {
     )
     val uiState = viewModel.uiState
 
-    // Mensajería de Toast
+
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
@@ -100,7 +98,7 @@ fun AddBookScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(16.dp),
-                // 3. CAMBIAMOS EL COLOR DE LA CARD A AMARILLO (50% OPACIDAD)
+
                 colors = CardDefaults.cardColors(containerColor = LivriaYellowLight.copy(alpha = 0.35f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -111,7 +109,7 @@ fun AddBookScreen(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        // 4. TRADUCIMOS EL TÍTULO
+
                         text = "ADD TO INVENTORY",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge.copy(
@@ -124,42 +122,42 @@ fun AddBookScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
                     )
 
-                    // 1. INPUTS DE TEXTO - TRADUCIDOS
+
                     InputTextField(
-                        label = "Title", // TRADUCIDO
+                        label = "Title",
                         value = uiState.title,
                         onValueChange = viewModel::onTitleChange
                     )
                     InputTextField(
-                        label = "Author", // TRADUCIDO
+                        label = "Author",
                         value = uiState.author,
                         onValueChange = viewModel::onAuthorChange
                     )
                     InputTextField(
-                        label = "Description", // TRADUCIDO
+                        label = "Description",
                         value = uiState.description,
                         onValueChange = viewModel::onDescriptionChange,
                         singleLine = false,
                         maxLines = 4
                     )
                     InputTextField(
-                        label = "Stock", // TRADUCIDO
+                        label = "Stock",
                         value = uiState.stock,
                         onValueChange = viewModel::onStockChange,
                         keyboardType = KeyboardType.Number
                     )
 
-                    // 2. SELECTOR DE GÉNERO - TRADUCIDO
+
                     OptionSelector(
-                        label = "Genre", // TRADUCIDO
+                        label = "Genre",
                         options = BookOptions.GENRE_OPTIONS,
                         selectedOption = uiState.genre,
                         onSelect = viewModel::onGenreSelected
                     )
 
-                    // 3. SELECTOR DE IDIOMA - TRADUCIDO
+
                     OptionSelector(
-                        label = "Language", // TRADUCIDO
+                        label = "Language",
                         options = BookOptions.LANGUAGE_OPTIONS,
                         selectedOption = uiState.language,
                         onSelect = viewModel::onLanguageSelected
@@ -167,7 +165,7 @@ fun AddBookScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // 4. SELECTOR DE IMAGEN DE PORTADA (Mejorado)
+
                     CoverImagePicker(
                         currentUri = uiState.cover,
                         onUriSelected = viewModel::onCoverUriSelected
@@ -175,7 +173,7 @@ fun AddBookScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 5. BOTÓN DE ENVÍO - TRADUCIDO Y CON NUEVOS COLORES
+
                     Button(
                         onClick = viewModel::submitBook,
                         enabled = !uiState.isLoading,
@@ -184,19 +182,16 @@ fun AddBookScreen(navController: NavController) {
                             .height(56.dp)
                             .clip(RoundedCornerShape(12.dp)),
                         colors = ButtonDefaults.buttonColors(
-                            // Fondo LivriaYellowLight
                             containerColor = LivriaYellowLight,
-                            // Fuente LivriaBlue (asumiendo que es tu color "Navy Blue" más oscuro)
                             contentColor = LivriaBlue
                         )
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
-                                color = LivriaBlue, // Usamos LivriaBlue para el spinner
+                                color = LivriaBlue,
                                 modifier = Modifier.size(28.dp)
                             )
                         } else {
-                            // TRADUCIDO
                             Text(
                                 "ADD BOOK",
                                 fontFamily = AlexandriaFontFamily,
@@ -206,7 +201,7 @@ fun AddBookScreen(navController: NavController) {
                         }
                     }
 
-                    // Mensajes de error/éxito
+
                     if (uiState.errorMessage != null) {
                         Text(
                             text = uiState.errorMessage,
@@ -218,7 +213,7 @@ fun AddBookScreen(navController: NavController) {
                     if (uiState.successMessage != null) {
                         Text(
                             text = uiState.successMessage,
-                            color = LivriaBlue, // Un color de éxito
+                            color = LivriaBlue,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp)
                         )
@@ -230,7 +225,7 @@ fun AddBookScreen(navController: NavController) {
     }
 
 
-// ---------------- Componentes Reutilizables ----------------
+
 
 @Composable
 private fun InputTextField(
@@ -292,7 +287,7 @@ private fun OptionSelector(
 
     OutlinedTextField(
         value = displayText,
-        onValueChange = { /* Solo lectura */ },
+        onValueChange = {  },
         label = {
             Text(
                 label,
@@ -370,12 +365,7 @@ private fun CoverImagePicker(
             }
         }
     )
-    // val cameraLauncher = rememberLauncherForActivityResult(
-    //     contract = ActivityResultContracts.TakePicture(),
-    //     onResult = { success: Boolean ->
-    //         if (success) { /* Manejar la URI de la foto tomada */ }
-    //     }
-    // )
+
 
     Column(
         modifier = Modifier
@@ -393,7 +383,7 @@ private fun CoverImagePicker(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Contenedor visual para la imagen con acciones de carga
+
         Box(
             modifier = Modifier
                 .size(180.dp, 240.dp) // Tamaño ligeramente más grande para la imagen
@@ -417,7 +407,7 @@ private fun CoverImagePicker(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Overlay para mostrar el icono de carga si no hay imagen
+
             if (currentUri.isBlank()) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
@@ -437,12 +427,12 @@ private fun CoverImagePicker(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Botones de acción explícitos para Cámara y Galería
+
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Botón para Galería
+
             OutlinedButton(
                 onClick = { galleryLauncher.launch("image/*") },
                 shape = RoundedCornerShape(8.dp),
@@ -458,12 +448,12 @@ private fun CoverImagePicker(
                 Text("Gallery")
             }
 
-            // Botón para Cámara (requiere implementación de permisos y TakePicture)
+
             OutlinedButton(
                 onClick = {
-                    // Implementar lanzamiento de la cámara aquí
+
                     Toast.makeText(context, "Funcionalidad de Cámara (en desarrollo)", Toast.LENGTH_SHORT).show()
-                    // cameraLauncher.launch(obtenerUriParaGuardarFoto())
+
                 },
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.outlinedButtonColors(

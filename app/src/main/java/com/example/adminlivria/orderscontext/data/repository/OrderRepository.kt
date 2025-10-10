@@ -16,7 +16,7 @@ class OrderRepository(
     private val dao: OrderDao
 ) {
 
-    // GET /orders - Obtener todas las órdenes
+
     suspend fun getAllOrders(): Resource<List<Order>> = withContext(Dispatchers.IO) {
         try {
             val response = service.getAllOrders()
@@ -47,7 +47,7 @@ class OrderRepository(
         }
     }
 
-    // PUT -  Actualizar el estado de una orden
+
     suspend fun updateOrderStatus(orderId: Int, newStatus: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             val statusUpdate = mapOf("status" to newStatus)
@@ -63,7 +63,7 @@ class OrderRepository(
         }
     }
 
-    // SEARCH
+
     suspend fun searchOrders(input: String): Resource<List<Order>> = withContext(Dispatchers.IO) {
         try {
             val response = service.getAllOrders()
@@ -72,7 +72,7 @@ class OrderRepository(
                 response.body()?.let { ordersDto: List<OrderDto> ->
                     val filteredOrders = ordersDto
                         .filter { it.userFullName.contains(input, ignoreCase = true) || it.code.contains(input, ignoreCase = true) }
-                        .map { it.toDomain() } // Convertir todos a entidades de Dominio
+                        .map { it.toDomain() }
 
                     if (filteredOrders.isNotEmpty()) {
                         return@withContext Resource.Success(data = filteredOrders)

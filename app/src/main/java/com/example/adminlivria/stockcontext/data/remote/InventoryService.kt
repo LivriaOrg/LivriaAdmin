@@ -26,7 +26,7 @@ data class UpdateStockRequest(
     @SerializedName("quantityToAdd") val quantityToAdd: Int
 )
 
-// ----------------------------------------------------
+
 
 
 interface InventoryService {

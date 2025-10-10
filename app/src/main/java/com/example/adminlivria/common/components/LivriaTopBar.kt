@@ -1,4 +1,3 @@
-// LivriaTopBar.kt (reemplazar)
 package com.example.adminlivria.common.components
 
 import android.util.Log
@@ -39,7 +38,6 @@ fun LivriaTopBar(
 ) {
     val TAG = "LivriaTopBar"
 
-    // 1) Factory + ViewModel: UNA SOLA VEZ
     val factory = remember {
         SettingsViewModelFactory(
             userAdminService = userAdminService,
@@ -49,18 +47,16 @@ fun LivriaTopBar(
     val settingsViewModel: SettingsViewModel = viewModel(factory = factory)
     val settingsState by settingsViewModel.uiState.collectAsState()
 
-    // Debug: mostrar info cuando se monte TopBar y cuando llame al load
     LaunchedEffect(key1 = tokenManager.getToken()) {
         val token = tokenManager.getToken()
         Log.d("LivriaTopBar", "token changed in TopBar -> $token ; VM=${settingsViewModel.hashCode()}")
         if (token != null && token.isNotBlank()) {
-            // si ya hay token, cargamos. Si token es null, no hace la petición.
+
             settingsViewModel.loadAdminData()
             Log.d("LivriaTopBar", "TopBar requested loadAdminData() on VM=${settingsViewModel.hashCode()}")
         }
     }
 
-    // Debug: cada vez que cambie el capital, lo logueamos (ayuda a saber si actualiza)
     LaunchedEffect(settingsState.capital) {
         Log.d(TAG, "TopBar VM=${settingsViewModel.hashCode()} capital changed => ${settingsState.capital}")
     }

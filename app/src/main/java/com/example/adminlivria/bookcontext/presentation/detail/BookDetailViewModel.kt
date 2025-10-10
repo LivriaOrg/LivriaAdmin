@@ -26,7 +26,7 @@ class BookDetailViewModelFactory(
     private val bookId: Int
 ) : ViewModelProvider.Factory {
     private val db = AdminDatabase.getInstance(context)
-    private val repo = BooksRepository(db.bookDao(), bookServiceInstance) // <- tu instance común
+    private val repo = BooksRepository(db.bookDao(), bookServiceInstance)
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return BookDetailViewModel(repo, bookId) as T
     }

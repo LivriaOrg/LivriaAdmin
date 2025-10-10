@@ -1,4 +1,4 @@
-// bookcontext/presentation/stock/StockScreen.kt
+
 package com.example.adminlivria.bookcontext.presentation.stock
 
 import androidx.compose.foundation.layout.*
@@ -126,7 +126,7 @@ private fun LabeledPriceRow(label: String, value: Double) {
 
 @Composable
 private fun QuantityPicker(qty: Int, onChange: (Int) -> Unit) {
-    // Simple +/-
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         FilledTonalButton(onClick = { onChange((qty - 1).coerceAtLeast(1)) }) { Text("-") }
         Spacer(Modifier.width(10.dp))

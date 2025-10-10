@@ -11,9 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-// ----------------------------------------------------------------------
-// 1. DEFINICIÓN DEL ESQUEMA DE COLOR CLARO (LIGHT)
-// ----------------------------------------------------------------------
+
 private val LightColorScheme = lightColorScheme(
     // Colores principales de la marca
     primary = LivriaOrange,        // Anaranjado (#FF5C00)
@@ -34,9 +32,7 @@ private val LightColorScheme = lightColorScheme(
     onError = Color.White
 )
 
-// ----------------------------------------------------------------------
-// 2. DEFINICIÓN DEL ESQUEMA DE COLOR OSCURO (DARK)
-// ----------------------------------------------------------------------
+
 private val DarkColorScheme = darkColorScheme(
     // Colores principales de la marca (mantienen su valor)
     primary = LivriaOrange,        // Anaranjado
@@ -57,9 +53,7 @@ private val DarkColorScheme = darkColorScheme(
     onError = Color.Black
 )
 
-// ----------------------------------------------------------------------
-// 3. FUNCIÓN COMPOSABLE CON LOS STYLE GUIDELINES DE COLOR Y TIPOGRAFÍA
-// ----------------------------------------------------------------------
+
 @Composable
 fun AdminLivriaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

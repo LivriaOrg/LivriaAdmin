@@ -63,7 +63,7 @@ class HomeViewModel(
 
                     _uiState.update { state ->
                         state.copy(
-                            user = adminUser, // Actualiza el objeto AdminUser completo
+                            user = adminUser,
                             isLoading = false
                         )
                     }

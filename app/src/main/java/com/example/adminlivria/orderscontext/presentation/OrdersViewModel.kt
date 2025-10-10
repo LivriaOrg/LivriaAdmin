@@ -32,7 +32,7 @@ class OrdersViewModel(
         loadAllOrders()
     }
 
-    // ---  Lógica de Búsqueda (Conectada al botón de lupa) ---
+
     fun onSearchEntered(search: String) { _search.value = search }
     fun onSearchClicked() {
         _state.value = UIState(isLoading = true)
@@ -47,7 +47,7 @@ class OrdersViewModel(
         }
     }
 
-    // Obtener todas las órdenes
+
     fun loadAllOrders() {
         _state.value = UIState(isLoading = true)
         viewModelScope.launch {

@@ -17,10 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// Importaciones clave para la corrección
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-// Fin de importaciones clave
 import androidx.compose.ui.graphics.Color
 import com.example.adminlivria.common.ui.theme.AlexandriaFontFamily
 import com.example.adminlivria.common.ui.theme.AsapCondensedFontFamily
@@ -111,7 +109,6 @@ fun SettingsScreen(
     }
 }
 
-// ---------------- Componentes ----------------
 
 @Composable
 fun SettingsHeader() {
@@ -253,7 +250,6 @@ fun TabSelector(
     }
 }
 
-// ---------- Profile Content ----------
 
 @Composable
 fun ProfileSettingsContent(
@@ -276,7 +272,7 @@ fun ProfileSettingsContent(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
 
-        // Campo Display (anteriormente FullName en el mock)
+
         OutlinedTextField(
             value = state.display,
             onValueChange = { viewModel.updateField("fullName", it) },
@@ -305,7 +301,7 @@ fun ProfileSettingsContent(
                 .padding(bottom = 8.dp)
         )
 
-        // Campo Email
+
         OutlinedTextField(
             value = state.email,
             onValueChange = { viewModel.updateField("email", it) },
@@ -334,7 +330,7 @@ fun ProfileSettingsContent(
                 .padding(bottom = 8.dp)
         )
 
-        // Campo Security Pin
+
         OutlinedTextField(
             value = state.securityPin,
             onValueChange = { viewModel.updateField("securityPin", it) },
@@ -424,14 +420,13 @@ fun ProfileSettingsContent(
     }
 }
 
-// ---------- Application Content ----------
 
 @Composable
 fun ApplicationSettingsContent(
     viewModel: SettingsViewModel,
     onLogout: () -> Unit
 ) {
-    // CORRECCIÓN: Colectar el StateFlow para obtener el objeto SettingsUiState
+
     val state by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -447,7 +442,7 @@ fun ApplicationSettingsContent(
             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
         )
 
-        // 1. Notificaciones
+
         SettingRow(
             title = "Notifications",
             description = "Receive notifications in the app",
@@ -455,7 +450,7 @@ fun ApplicationSettingsContent(
             onToggle = { viewModel.updateApplicationSetting("notifications", it) }
         )
 
-        // 2. Email Alerts
+
         SettingRow(
             title = "Email Alerts",
             description = "Receive email alerts",
@@ -470,7 +465,7 @@ fun ApplicationSettingsContent(
             onToggle = { viewModel.updateApplicationSetting("autoSave", it) }
         )
 
-        // --- SECCIÓN DE BOTONES ---
+
 
         if (state.saveSuccess) {
             Text(

@@ -39,7 +39,7 @@ val AsapCondensedFontFamily = FontFamily(
 )
 
 
-// --- APLICACIÓN EN EL OBJETO TYPOGRAPHY ---
+
 val Typography = Typography(
 
     // LOGO Y TÍTULOS (usando Asap Condensed)

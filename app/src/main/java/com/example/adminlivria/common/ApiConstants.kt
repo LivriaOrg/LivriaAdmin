@@ -18,7 +18,7 @@ import com.example.adminlivria.bookcontext.data.remote.BookService
 import com.example.adminlivria.bookcontext.data.repository.BooksRepository
 import com.example.adminlivria.common.data.local.AdminDatabase
 import com.example.adminlivria.statscontext.data.local.StatsDao
-import com.example.adminlivria.statscontext.data.repository.StatsRepository // La clase concreta
+import com.example.adminlivria.statscontext.data.repository.StatsRepository
 
 const val BASE_URL = "https://livria-api.azurewebsites.net/api/v1/"
 

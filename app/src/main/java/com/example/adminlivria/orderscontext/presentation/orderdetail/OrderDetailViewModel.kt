@@ -32,7 +32,6 @@ class OrderDetailViewModel(
 
             val result = repository.updateOrderStatus(orderId, newStatus)
             if (result is Resource.Success) {
-                // Recargar la orden actualizada
                 val refreshed = repository.getOrderById(orderId)
                 if (refreshed is Resource.Success) {
                     _state.value = UIState(data = refreshed.data)

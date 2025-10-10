@@ -1,5 +1,3 @@
-// presentation/components/LivriaBottomNavBar.kt
-
 package com.example.adminlivria.common.components
 
 import androidx.compose.foundation.background
@@ -13,8 +11,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.adminlivria.R // Para acceder a tus iconos (R.drawable.ic_home, etc.)
-import com.example.adminlivria.common.navigation.NavDestinations // Rutas
+import com.example.adminlivria.R
+import com.example.adminlivria.common.navigation.NavDestinations
 import com.example.adminlivria.common.ui.theme.LivriaOrange
 import com.example.adminlivria.common.ui.theme.LivriaAmber
 import com.example.adminlivria.common.ui.theme.LivriaBlue
@@ -23,9 +21,9 @@ import com.example.adminlivria.common.ui.theme.LivriaNavyBlue
 import com.example.adminlivria.common.ui.theme.LivriaSoftCyan
 import com.example.adminlivria.common.ui.theme.LivriaYellowLight
 
-// --------------------------------------------------------------------
-// 1. DEFINICIÓN DE LOS ELEMENTOS DE NAVEGACIÓN
-// --------------------------------------------------------------------
+
+
+
 
 sealed class BottomNavItem(
     val title: String,
@@ -47,9 +45,6 @@ val items = listOf(
     BottomNavItem.Stats
 )
 
-// --------------------------------------------------------------------
-// 2. COMPOSABLE PRINCIPAL
-// --------------------------------------------------------------------
 
 @Composable
 fun LivriaBottomNavBar(
@@ -65,7 +60,7 @@ fun LivriaBottomNavBar(
         Modifier.fillMaxWidth()
             .navigationBarsPadding()
     ) {
-        // --- Tira de colores superior ---
+
         Row(
             Modifier.fillMaxWidth().height(4.dp)
         ) {
@@ -113,7 +108,7 @@ fun LivriaBottomNavBar(
             )
         }
 
-        // --- Barra de Navegación ---
+
         NavigationBar(
             containerColor = backgroundColor,
             contentColor = Color.White,

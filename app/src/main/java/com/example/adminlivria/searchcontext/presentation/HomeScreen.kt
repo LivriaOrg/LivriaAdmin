@@ -84,7 +84,7 @@ fun HomeScreen(
                     defaultElevation = 10.dp
                 )
             ) {
-                // --- 1. SECCIÓN DE BIENVENIDA ---
+
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
                         "Welcome to the Library Management System",
@@ -129,7 +129,7 @@ fun HomeScreen(
                     }
                 }
                 if (!state.isLoading && state.loadError == null) {
-                    // --- 2. SECCIÓN DE QUICK ACTIONS ---
+
                     Column {
                         Text(
                             "Quick Actions",
@@ -199,7 +199,7 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 3. SYSTEM INFORMATION SECTION
+
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = LivriaYellowLight.copy(alpha = 0.35f),
@@ -310,7 +310,7 @@ fun LoadingSection() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp) // Altura similar al WelcomeCard
+            .height(60.dp)
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
