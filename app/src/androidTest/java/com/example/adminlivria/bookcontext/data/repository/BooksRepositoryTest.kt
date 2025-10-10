@@ -19,9 +19,6 @@ import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 
-/**
- * Este archivo contiene Unit Tests para el BooksRepository
- */
 class BooksRepositoryTest {
 
     private val testDispatcher = StandardTestDispatcher()
@@ -54,7 +51,7 @@ class BooksRepositoryTest {
             "Ciencia" to 20
         )
 
-        assertEquals("El mapeo del conteo de géneros debe ser correcto", expected, result)
+        assertEquals(expected, result)
     }
 
     @Test
@@ -72,7 +69,7 @@ class BooksRepositoryTest {
             "Historia" to 300.00f
         )
 
-        assertEquals("El mapeo del valor monetario debe ser correcto (Double a Float)", expected, result)
+        assertEquals(expected, result)
     }
 
     @Test
@@ -85,9 +82,9 @@ class BooksRepositoryTest {
 
         val result = repository.getTopBooksByStock(limit = 2)
 
-        assertEquals("Debe devolver el número correcto de objetos Book (2)", 2, result.size)
-        assertEquals("El ID del primer libro debe coincidir (mapeo a dominio)", 1, result.first().id)
-        assertEquals("El stock del segundo libro debe coincidir", 50, result[1].stock)
+        assertEquals(2, result.size)
+        assertEquals(1, result.first().id)
+        assertEquals(50, result[1].stock)
     }
 
     private class FakeBookDao : BookDao {

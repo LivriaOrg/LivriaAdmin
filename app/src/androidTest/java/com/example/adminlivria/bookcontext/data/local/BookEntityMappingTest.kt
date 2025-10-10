@@ -4,10 +4,6 @@ import com.example.adminlivria.bookcontext.domain.Book
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Unit tests para verificar el mapeo entre Book y BookEntity (bidireccional).
- * Estos tests validan que las funciones toEntity() y toDomain() funcionen correctamente.
- */
 class BookEntityMappingTest {
 
     private val TEST_ID = 42
@@ -36,7 +32,6 @@ class BookEntityMappingTest {
 
     @Test
     fun toDomain_debe_convertir_BookEntity_a_Book_correctamente() {
-        // Arrange
         val entity = BookEntity(
             id = TEST_ID,
             title = TEST_TITLE,
@@ -63,16 +58,13 @@ class BookEntityMappingTest {
             cover = TEST_COVER
         )
 
-        // Act
         val result = entity.toDomain()
 
-        // Assert
         assertBookEquals(expected, result)
     }
 
     @Test
     fun toEntity_debe_convertir_Book_a_BookEntity_correctamente() {
-        // Arrange
         val domain = Book(
             id = TEST_ID,
             title = TEST_TITLE,
@@ -99,10 +91,8 @@ class BookEntityMappingTest {
             cover = TEST_COVER
         )
 
-        // Act
         val result = domain.toEntity()
 
-        // Assert
         assertEquals(expected, result)
     }
 }

@@ -4,13 +4,8 @@ import com.example.adminlivria.bookcontext.domain.Book
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Unit Tests para funciones de mapeo entre BookEntity <-> Book.
- * Pruebas puramente lógicas, no dependen de Android ni de Corrutinas.
- */
 class BookEntityMapperTest {
 
-    // --- Datos de prueba consistentes ---
     private val TEST_ID = 42
     private val TEST_TITLE = "El Principito"
     private val TEST_DESCRIPTION = "Un cuento filosófico"
@@ -48,10 +43,8 @@ class BookEntityMapperTest {
         assertEquals(expected.cover, actual.cover)
     }
 
-    // --- Test 1: BookEntity -> Book ---
     @Test
     fun bookEntity_toDomain_debe_mapear_todos_los_campos_correctamente() {
-        // Arrange
         val entity = BookEntity(
             id = TEST_ID,
             title = TEST_TITLE,
@@ -77,17 +70,13 @@ class BookEntityMapperTest {
             cover = TEST_COVER
         )
 
-        // Act
         val result = entity.toDomain()
 
-        // Assert
         assertBookEquals(expected, result)
     }
 
-    // --- Test 2: Book -> BookEntity ---
     @Test
     fun book_toEntity_debe_mapear_todos_los_campos_correctamente() {
-        // Arrange
         val book = Book(
             id = TEST_ID,
             title = TEST_TITLE,
@@ -113,10 +102,8 @@ class BookEntityMapperTest {
             cover = TEST_COVER
         )
 
-        // Act
         val result = book.toEntity()
 
-        // Assert
         assertEntityEquals(expected, result)
     }
 }
