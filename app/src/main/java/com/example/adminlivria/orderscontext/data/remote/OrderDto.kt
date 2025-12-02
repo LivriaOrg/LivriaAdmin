@@ -7,14 +7,12 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-
 data class ShippingDto(
     val address: String,
     val city: String,
     val district: String,
     val reference: String
 )
-
 
 data class ItemDto(
     val id: Int,
@@ -26,7 +24,6 @@ data class ItemDto(
     val quantity: Int,
     val itemTotal: Double
 )
-
 
 data class OrderDto(
     val id: Int,
@@ -40,16 +37,16 @@ data class OrderDto(
     @SerializedName("isDelivery")
     var isDelivery: Boolean,
 
-    val shipping: ShippingDto,
+    // CAMBIO 1: Agregamos '?' para permitir que sea nulo
+    val shipping: ShippingDto?,
+
     val total: Double,
     val date: String,
     val items: List<ItemDto>
 )
 
-
-
-
-fun OrderDto.toDomain() = Order(
+fun OrderDto.toDomain(): Order {
+    return Order(
         id = id,
         code = code,
         userClientId = userClientId,
@@ -59,7 +56,16 @@ fun OrderDto.toDomain() = Order(
         recipientName = recipientName,
         status = status,
         isDelivery = isDelivery,
-        shipping = shipping.toDomain(),
+
+        // CAMBIO 2: Manejo seguro del nulo
+        // Si shipping existe, lo convertimos. Si es null, creamos uno vacío por defecto.
+        shipping = shipping?.toDomain() ?: Shipping(
+            address = "",
+            city = "",
+            district = "",
+            reference = ""
+        ),
+
         total = total,
         date = try {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
@@ -69,10 +75,10 @@ fun OrderDto.toDomain() = Order(
         },
         items = items.map { it.toDomain() }
     )
+}
 
 fun ShippingDto.toDomain() = Shipping(address, city, district, reference)
 fun ItemDto.toDomain() = Item(id, bookId, bookTitle, bookAuthor, bookPrice, bookCover, quantity, itemTotal)
-
 
 fun Order.toDto(): OrderDto {
     return OrderDto(

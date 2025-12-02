@@ -304,7 +304,9 @@ fun SearchNFilterCard(
                         fontSize = 20.sp,
                         letterSpacing = 2.sp
                     ),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    // CAMBIO: Agregado padding a la izquierda para alinearlo
+                    modifier = Modifier.padding(start = 24.dp)
                 )
             }
             Row(
