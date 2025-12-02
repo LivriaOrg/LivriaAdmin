@@ -20,7 +20,7 @@ import com.example.adminlivria.common.data.local.AdminDatabase
 import com.example.adminlivria.statscontext.data.local.StatsDao
 import com.example.adminlivria.statscontext.data.repository.StatsRepository
 
-const val BASE_URL = "https://lililivria.azurewebsites.net/api/v1"
+const val BASE_URL = "https://lililivria.azurewebsites.net/api/v1/"
 
 private lateinit var tokenManager: TokenManager
 
