@@ -447,26 +447,6 @@ private fun CoverImagePicker(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Gallery")
             }
-
-
-            OutlinedButton(
-                onClick = {
-
-                    Toast.makeText(context, "Funcionalidad de Cámara (en desarrollo)", Toast.LENGTH_SHORT).show()
-
-                },
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = LivriaSoftCyan.copy(alpha = 0.5f),
-                    contentColor = LivriaBlue
-                ),
-                border = BorderStroke(1.dp, LivriaBlue),
-                modifier = Modifier.weight(1f).padding(start = 4.dp)
-            ) {
-                Icon(Icons.Filled.CameraAlt, contentDescription = "Cámara", modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Camera")
-            }
         }
         if (currentUri.isNotBlank()) {
             Text(
